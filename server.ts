@@ -650,15 +650,8 @@ async function startServer() {
       // Determine recipient (if sender is user, recipient is lawyer, and vice versa)
       const recipientId = senderRole === 'user' ? caseData.lawyerId : caseData.clientId;
 
-      // Real-time Push via Socket.io
-      io.to(recipientId).emit('new_message', {
-        caseId: req.params.id,
-        text,
-        senderName: currentUser.name
-      });
-
       // Create System Notification
-      await prisma.notification.create({
+      const notification = await prisma.notification.create({
         data: {
           userId: recipientId,
           title: 'رسالة جديدة',
@@ -667,6 +660,9 @@ async function startServer() {
           link: senderRole === 'user' ? '/pro' : '/my-cases'
         }
       });
+
+      // Real-time Push via Socket.io
+      io.to(recipientId).emit('notification', notification);
 
       res.json({ data: caseData });
     } catch (error) {

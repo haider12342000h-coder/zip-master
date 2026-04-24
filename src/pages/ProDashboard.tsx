@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Chart } from 'chart.js/auto';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
 import ActionButton from '../components/ui/ActionButton';
 import NoticePanel from '../components/ui/NoticePanel';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -126,6 +128,30 @@ const vaultStatusClassMap: Record<VaultDoc['status'], string> = {
   Reviewed: 'bg-blue-100 text-blue-700',
   Signed: 'bg-green-100 text-green-700',
   'Needs Review': 'bg-red-100 text-red-700'
+};
+
+// Web Audio API helper for notification sound
+const playNotificationSound = () => {
+  const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+  if (!AudioContext) return;
+  
+  const ctx = new AudioContext();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+  osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.1); // C6
+  osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.3); // G5
+
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.05);
+  gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.4);
 };
 
 const messagePriorityLabelMap: Record<InboxMessage['priority'], string> = {
@@ -445,6 +471,7 @@ export default function ProDashboard() {
   const [aiResponse, setAiResponse] = useState('هنا يظهر ملخص الذكاء الاصطناعي بعد التشغيل، مع أهم النقاط والإجراءات المقترحة.');
   const [isAiRunning, setIsAiRunning] = useState(false);
   const [replyDraft, setReplyDraft] = useState('');
+  const { notifications, unreadCount, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications, NotificationBell } = useNotifications();
   const [caseNote, setCaseNote] = useState('');
   const [workbenchReply, setWorkbenchReply] = useState('');
   const [activeSavedView, setActiveSavedView] = useState<SavedViewId>('urgent-today');
@@ -453,11 +480,7 @@ export default function ProDashboard() {
     const hour = new Date().getHours();
     const base = hour < 12 ? 'صباح الخير' : hour < 18 ? 'طاب يومك' : 'مساء الخير';
     return `${base} دكتور ${user?.name?.split(' ')[0] || 'عمر'}`;
-  }, [user]);
-
-  const selectedCase = cases.find(caseItem => caseItem.id === selectedCaseId) ?? cases[0];
-  const selectedVaultDoc = vaultDocs.find(doc => doc.id === selectedVaultDocId) ?? vaultDocs[0];
-  const selectedInboxMessage = inboxMessages.find(message => message.id === activeMessageId) ?? inboxMessages[0];
+  }, [user?.id]);
 
   useEffect(() => {
     const current = cases.find(c => c.id === selectedCaseId);
@@ -890,6 +913,29 @@ export default function ProDashboard() {
     }
   };
 
+  const messagePriorityLabelMap: Record<InboxMessage['priority'], string> = {
+    High: 'عاجلة',
+    Medium: 'متوسطة',
+    Low: 'عادية'
+  };
+  
+  const messagePriorityClassMap: Record<InboxMessage['priority'], string> = {
+    High: 'bg-red-100 text-red-700',
+    Medium: 'bg-amber-100 text-amber-700',
+    Low: 'bg-gray-100 text-gray-700'
+  };
+  
+  const tabs: Array<{ id: DashboardTab; label: string; icon: string; description: string }> = [
+    { id: 'overview', label: 'اليوم', icon: 'fa-grid-2', description: 'طابور العمل والأولويات الحالية' },
+    { id: 'cases', label: 'القضايا', icon: 'fa-briefcase', description: 'إدارة الملفات، التقدم، والفوترة' },
+    { id: 'communications', label: 'التواصل', icon: 'fa-inbox', description: 'الرسائل والمتابعة السريعة' },
+    { id: 'documents', label: 'الوثائق', icon: 'fa-folder-open', description: 'مستودع المستندات والمراجعة' },
+    { id: 'operations', label: 'التشغيل', icon: 'fa-sliders', description: 'الجدول، الفريق، والمساعد' }
+  ];
+  
+  const quickActions = [
+    { icon: 'fa-folder-plus', label: 'قضية جديدة' }, { icon: 'fa-envelope-open-text', label: 'رسالة عميل' }, { icon: 'fa-file-circle-check', label: 'مراجعة وثائق' }, { icon: 'fa-pen-to-square', label: 'إعداد مذكّرة' }, { icon: 'fa-robot', label: 'مساعد AI' }
+  ];
   const renderCaseWorkbench = () => (
     <div className="space-y-6">
       {/* Workbench Header */}
@@ -2030,9 +2076,63 @@ export default function ProDashboard() {
       <section className="rounded-[32px] border border-brand-navy/10 bg-gradient-to-l from-white via-slate-50 to-brand-navy/5 p-5 shadow-premium md:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 text-right">
-            <div className="inline-flex items-center rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-xs font-bold text-brand-navy">
-              <i className="fa-solid fa-briefcase ml-2"></i>
-              مساحة المحامي
+            <div className="flex items-center justify-end gap-3 mb-4">
+              <div className="relative">
+                <button 
+                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                  className="h-10 w-10 flex items-center justify-center rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-brand-navy hover:shadow-md transition-all relative"
+                >
+                  <i className="fa-solid fa-bell"></i>
+                  {notifications.filter(n => !n.read).length > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 border-2 border-white text-[8px] font-black text-white flex items-center justify-center">
+                      {notifications.filter(n => !n.read).length}
+                    </span>
+                  )}
+                </button>
+                
+                <AnimatePresence>
+                  {isNotificationsOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setIsNotificationsOpen(false)}></div>
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute top-full right-0 mt-3 w-80 bg-white border border-slate-200 rounded-[2rem] shadow-2xl z-50 overflow-hidden text-right origin-top-right"
+                      >
+                        <div className="p-4 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+                          <button onClick={() => setNotifications([])} className="text-[10px] font-black text-slate-400 hover:text-red-500">مسح الكل</button>
+                          <h4 className="text-xs font-black text-brand-dark">التنبيهات</h4>
+                        </div>
+                        <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                          {notifications.length > 0 ? notifications.map(n => (
+                            <div 
+                              key={n.id} 
+                              onClick={() => handleMarkAsRead(n.id)}
+                              className={`p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition cursor-pointer ${!n.read ? 'bg-brand-navy/[0.02]' : ''}`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-[9px] font-bold text-slate-400">{new Date(n.createdAt).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}</span>
+                                <p className={`text-xs font-black ${!n.read ? 'text-brand-navy' : 'text-slate-600'}`}>{n.title}</p>
+                              </div>
+                              <p className="text-[11px] font-bold text-slate-500 leading-relaxed">{n.message}</p>
+                            </div>
+                          )) : (
+                            <div className="p-10 text-center text-slate-300">
+                              <i className="fa-solid fa-bell-slash text-3xl mb-3 opacity-20"></i>
+                              <p className="text-xs font-bold">لا توجد تنبيهات جديدة</p>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+              <div className="inline-flex items-center rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-xs font-bold text-brand-navy">
+                <i className="fa-solid fa-briefcase ml-2"></i>
+                مساحة المحامي
+              </div>
             </div>
             <h2 className="mt-4 text-3xl font-bold leading-tight text-brand-dark">لوحة المحامي الاحترافية</h2>
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-gray-600">
@@ -2398,6 +2498,40 @@ export default function ProDashboard() {
             </div>
           </div>
         )}
+
+      {/* Real-time Toast Notification */}
+      <AnimatePresence>
+        {activeToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9, x: 20 }}
+            animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9, x: 20 }}
+            className="fixed bottom-6 right-6 z-[600] max-w-sm w-full"
+          >
+            <div className="bg-brand-dark text-white rounded-[2rem] p-5 shadow-2xl border border-white/10 flex items-start gap-4 backdrop-blur-md">
+              <div className="h-12 w-12 rounded-2xl bg-brand-gold/20 flex items-center justify-center text-brand-gold shrink-0 shadow-inner">
+                <i className="fa-solid fa-bell-concierge text-lg animate-bounce"></i>
+              </div>
+              <div className="flex-1 min-w-0 text-right">
+                <h4 className="text-sm font-black text-brand-gold mb-1">{activeToast.title}</h4>
+                <p className="text-xs font-bold text-slate-300 leading-relaxed line-clamp-2">{activeToast.message}</p>
+                <button 
+                  onClick={() => {
+                    if (activeToast.link) navigate(activeToast.link);
+                    setActiveToast(null);
+                  }}
+                  className="mt-3 text-[10px] font-black uppercase tracking-widest text-brand-gold hover:text-white transition-colors"
+                >
+                  عرض التفاصيل <i className="fa-solid fa-arrow-left mr-1"></i>
+                </button>
+              </div>
+              <button onClick={() => setActiveToast(null)} className="text-white/30 hover:text-white transition">
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
