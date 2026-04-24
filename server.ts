@@ -614,7 +614,9 @@ async function startServer() {
   app.post('/api/app/workspace/cases/:id/messages', authenticateToken, async (req, res) => {
     try {
       const currentUser = (req as any).user;
-      const { text, senderRole = 'user' } = req.body;
+      // Derive the role from the token rather than the body for security
+      const senderRole = currentUser.role === 'pro' ? 'lawyer' : 'user';
+      const { text } = req.body;
       const caseData = await addCaseMessage(req.params.id, currentUser.userId, text, senderRole);
 
       // Determine recipient (if sender is user, recipient is lawyer, and vice versa)

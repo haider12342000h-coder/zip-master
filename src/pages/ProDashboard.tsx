@@ -444,6 +444,7 @@ export default function ProDashboard() {
   const [aiResponse, setAiResponse] = useState('هنا يظهر ملخص الذكاء الاصطناعي بعد التشغيل، مع أهم النقاط والإجراءات المقترحة.');
   const [isAiRunning, setIsAiRunning] = useState(false);
   const [replyDraft, setReplyDraft] = useState('');
+  const [workbenchReply, setWorkbenchReply] = useState('');
   const [activeSavedView, setActiveSavedView] = useState<SavedViewId>('urgent-today');
 
   const greeting = useMemo(() => {
@@ -823,6 +824,28 @@ export default function ProDashboard() {
     setReplyDraft(`${prefix}${template}`);
   };
 
+  const handleUpdateCaseStatus = async (caseId: string, newStatus: CaseRecord['status']) => {
+    try {
+      await apiClient.bulkUpdateProCaseStatus([caseId], newStatus);
+      setCases(prev => prev.map(c => c.id === caseId ? { ...c, status: newStatus } : c));
+      setQuickActionNote(`تم تحديث حالة القضية إلى ${newStatus}.`);
+    } catch (err) {
+      console.error("Failed to update status", err);
+    }
+  };
+
+  const handleSendWorkbenchMessage = async () => {
+    if (!workbenchReply.trim() || !selectedCase) return;
+    try {
+      await apiClient.addCaseMessage(selectedCase.id, workbenchReply, 'lawyer');
+      const response = await apiClient.getProWorkspace();
+      applyWorkspaceData(response.data);
+      setWorkbenchReply('');
+    } catch (err) {
+      console.error("Failed to send message", err);
+    }
+  };
+
   const renderCaseWorkbench = () => (
     <div className="space-y-6">
       {/* Workbench Header */}
@@ -836,7 +859,19 @@ export default function ProDashboard() {
           </button>
           <div className="text-right">
             <div className="flex items-center justify-end gap-2 mb-1">
-              <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase ${statusBadgeMap[selectedCase.status]}`}>{selectedCase.status}</span>
+              <div className="relative group/status">
+                <button className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase flex items-center gap-1.5 transition-transform hover:scale-105 ${statusBadgeMap[selectedCase.status]}`}>
+                  {selectedCase.status}
+                  <i className="fa-solid fa-chevron-down text-[7px] opacity-50"></i>
+                </button>
+                <div className="absolute top-full right-0 mt-1 w-32 bg-white border border-slate-100 shadow-xl rounded-xl py-1 z-50 opacity-0 invisible group-hover/status:opacity-100 group-hover/status:visible transition-all">
+                  {(['Open', 'In Review', 'Closed', 'At Risk'] as CaseRecord['status'][]).map(s => (
+                    <button key={s} onClick={() => handleUpdateCaseStatus(selectedCase.id, s)} className="w-full px-3 py-1.5 text-right text-[10px] font-black text-slate-600 hover:bg-slate-50 transition-colors">
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <h2 className="text-2xl font-black text-brand-dark">{selectedCase.title}</h2>
             </div>
             <p className="text-sm font-bold text-slate-500">العميل: {selectedCase.client} • {selectedCase.matter}</p>
@@ -906,13 +941,40 @@ export default function ProDashboard() {
                 ))}
               </div>
               <div className="mt-auto border-t border-slate-100 pt-4">
+                <div className="flex gap-1.5 mb-3 overflow-x-auto no-scrollbar pb-1">
+                  {responseTemplates.map((t, i) => (
+                    <button 
+                      key={i} 
+                      onClick={() => setWorkbenchReply(t)}
+                      className="shrink-0 px-2.5 py-1.5 bg-slate-100 hover:bg-brand-navy/10 text-[9px] font-black text-slate-500 rounded-lg transition-all border border-transparent hover:border-brand-navy/20 whitespace-nowrap"
+                      title={t}
+                    >
+                      <i className="fa-solid fa-bolt-lightning mr-1 opacity-50 text-brand-gold"></i>
+                      {t.substring(0, 18)}...
+                    </button>
+                  ))}
+                </div>
                 <div className="relative">
-                  <input
-                    type="text"
+                  <textarea
+                    rows={1}
+                    value={workbenchReply}
+                    onChange={(e) => setWorkbenchReply(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendWorkbenchMessage();
+                      }
+                    }}
                     placeholder="اكتب رداً سريعاً للعميل..."
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-right pr-4 focus:border-brand-navy outline-none"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-right pr-4 pl-10 focus:border-brand-navy outline-none resize-none transition-all focus:bg-white min-h-[44px]"
                   />
-                  <button className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg bg-brand-navy text-white text-[10px]"><i className="fa-solid fa-paper-plane"></i></button>
+                  <button 
+                    onClick={handleSendWorkbenchMessage}
+                    disabled={!workbenchReply.trim()}
+                    className="absolute left-2 bottom-2 h-7 w-7 rounded-lg bg-brand-navy text-white text-[10px] disabled:opacity-50 shadow-md transition-all hover:scale-105"
+                  >
+                    <i className="fa-solid fa-paper-plane"></i>
+                  </button>
                 </div>
               </div>
             </SurfaceCard>
