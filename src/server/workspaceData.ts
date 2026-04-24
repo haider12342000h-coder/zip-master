@@ -577,6 +577,13 @@ export async function uploadProVaultDocument(lawyerId: string, caseId: string | 
   return getProWorkspace(lawyerId);
 }
 
+export async function updateCaseProgress(caseId: string, progress: number) {
+  return prisma.case.update({
+    where: { id: caseId },
+    data: { progress },
+  });
+}
+
 export async function updateProMessageState(messageId: string, data: { unread?: boolean; awaitingResponse?: boolean }) {
   await prisma.message.update({
     where: { id: messageId },

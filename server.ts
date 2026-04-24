@@ -78,6 +78,7 @@ import {
   removeCaseCollaborator,
   signCaseDocument,
   toggleCaseArchive,
+  updateCaseProgress,
   updateProCaseStatuses,
   updateProMessageState,
   uploadProVaultDocument,
@@ -538,6 +539,18 @@ async function startServer() {
     } catch (error) {
       console.error('Update private note error:', error);
       res.status(500).json({ error: 'Failed to update private note' });
+    }
+  });
+
+  // Persist Case Progress
+  app.patch('/api/app/workspace/cases/:id/progress', authenticateToken, async (req, res) => {
+    try {
+      const { progress } = req.body;
+      const updated = await updateCaseProgress(req.params.id, Number(progress));
+      res.json({ data: updated });
+    } catch (error) {
+      console.error('Update progress error:', error);
+      res.status(500).json({ error: 'Failed to update progress' });
     }
   });
 

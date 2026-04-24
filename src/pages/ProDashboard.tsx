@@ -833,11 +833,19 @@ export default function ProDashboard() {
 
   const handleUpdateCaseProgress = async (caseId: string, progress: number) => {
     try {
-      // Assuming an API endpoint exists or using bulk update pattern
+      const token = localStorage.getItem('lexigate_token');
+      await fetch(`/api/app/workspace/cases/${caseId}/progress`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ progress })
+      });
       setCases(prev => prev.map(c => c.id === caseId ? { ...c, progress } : c));
-      setQuickActionNote(`تم تحديث تقدم القضية إلى ${progress}%.`);
+      setQuickActionNote(`تم حفظ نسبة الإنجاز الجديدة: ${progress}%.`);
     } catch (err) {
-      console.error("Failed to update progress", err);
+      console.error("Failed to persist progress", err);
     }
   };
 
@@ -974,15 +982,23 @@ export default function ProDashboard() {
               className="flex flex-col"
             >
               <div className="space-y-4 max-h-[260px] sm:max-h-[300px] overflow-y-auto px-1 mb-4 custom-scrollbar flex flex-col">
-                {caseRelatedMessages.length > 0 ? caseRelatedMessages.map(msg => (
-                  <div key={msg.id} className={`max-w-[85%] rounded-2xl p-3 text-right shadow-sm ${msg.name === user?.name ? 'self-end bg-brand-navy text-white' : 'self-start bg-slate-100 text-slate-700'}`}>
-                    <div className="flex items-center justify-between gap-4 mb-1 opacity-70">
-                      <span className="text-[9px] font-bold">{msg.time}</span>
-                      <span className="text-[10px] font-black">{msg.name === user?.name ? 'أنت' : msg.name}</span>
+                {caseRelatedMessages.length > 0 ? caseRelatedMessages.map(msg => {
+                  const isMe = msg.name === user?.name;
+                  return (
+                    <div key={msg.id} className={`flex gap-2.5 max-w-[90%] ${isMe ? 'flex-row-reverse self-end' : 'self-start'}`}>
+                      <div className="h-8 w-8 shrink-0 rounded-xl overflow-hidden border border-slate-100 shadow-sm mt-1">
+                        <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(msg.name)}&background=random`} alt="" className="h-full w-full object-cover" />
+                      </div>
+                      <div className={`relative rounded-2xl p-3 text-right shadow-sm ${isMe ? 'bg-brand-navy text-white rounded-tr-none after:absolute after:-right-1 after:top-0 after:w-3 after:h-3 after:bg-brand-navy after:rotate-45' : 'bg-slate-100 text-slate-700 rounded-tl-none after:absolute after:-left-1 after:top-0 after:w-3 after:h-3 after:bg-slate-100 after:rotate-45'}`}>
+                        <div className="flex items-center justify-between gap-4 mb-1 opacity-70">
+                          <span className="text-[9px] font-bold">{msg.time}</span>
+                          <span className="text-[10px] font-black">{isMe ? 'أنت' : msg.name}</span>
+                        </div>
+                        <p className="text-xs font-bold leading-relaxed">{msg.text}</p>
+                      </div>
                     </div>
-                    <p className="text-xs font-bold leading-relaxed">{msg.text}</p>
-                  </div>
-                )) : (
+                  );
+                }) : (
                   <div className="py-12 text-center text-slate-300">
                     <i className="fa-solid fa-comments mb-3 block text-3xl opacity-20"></i>
                     <p className="text-xs font-bold">ابدأ المحادثة مع العميل</p>
