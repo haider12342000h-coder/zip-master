@@ -53,7 +53,7 @@ export default function Auth() {
               <i className="fa-solid fa-scale-balanced text-2xl"></i>
             </div>
             <div>
-              <h1 className="text-3xl font-bold leading-none text-brand-dark">القسطاس الذكي</h1>
+              <h1 className="text-3xl font-bold leading-none text-brand-dark">القسطاس </h1>
               <span className="text-sm font-semibold text-gray-500">منظومة العدالة الرقمية العراقية المدعومة بالذكاء الاصطناعي</span>
             </div>
           </div>

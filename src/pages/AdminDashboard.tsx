@@ -186,6 +186,25 @@ function ImpactSummary({
   );
 }
 
+const HighlightText = ({ text, highlight }: { text: string; highlight: string }) => {
+  if (!highlight.trim()) return <>{text}</>;
+  const regex = new RegExp(`(${highlight})`, 'gi');
+  const parts = text.split(regex);
+  return (
+    <>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} className="bg-brand-gold/30 text-brand-dark px-0.5 rounded-sm">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+};
+
 export default function AdminDashboard() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
@@ -230,6 +249,7 @@ export default function AdminDashboard() {
 
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [docToDelete, setDocToDelete] = useState<string | null>(null);
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [systemLogs, setSystemLogs] = useState<Array<{ id: string, time: string, level: 'info' | 'warn' | 'error', msg: string }>>([
     { id: '1', time: '14:20:01', level: 'info', msg: 'AI RAG Engine: Indexing complete for 42 documents.' },
@@ -641,22 +661,48 @@ export default function AdminDashboard() {
   const cycleUserRole = async (id: string) => {
     const userItem = users.find((item) => item.id === id);
     if (!userItem) return;
+    setUserSaveStatus('saving');
     const nextRole = userItem.role === 'user' ? 'pro' : userItem.role === 'pro' ? 'admin' : 'user';
-    const response = await fetch(`/api/admin/users/${id}/role`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role: nextRole }),
-    });
-    if (!response.ok) return;
-    const updated = await response.json();
-    setUsers((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+    try {
+      const response = await fetch(`/api/admin/users/${id}/role`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: nextRole }),
+      });
+      if (!response.ok) throw new Error('Failed to update role');
+      const updated = await response.json();
+      setUsers((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+      setUserSaveStatus('saved');
+    } catch (err) {
+      console.error(err);
+      setUserSaveStatus('error');
+    } finally {
+      setTimeout(() => setUserSaveStatus('idle'), 2000);
+    }
   };
 
   const toggleUserBlock = async (id: string) => {
+    setUserSaveStatus('saving');
+    try {
     const response = await fetch(`/api/admin/users/${id}/block`, { method: 'POST' });
-    if (!response.ok) return;
-    const updated = await response.json();
-    setUsers((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+      if (!response.ok) throw new Error('Failed to toggle block status');
+      const updated = await response.json();
+      setUsers((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+      setUserSaveStatus('saved');
+    } catch (err) {
+      setUserSaveStatus('error');
+    } finally {
+      setTimeout(() => setUserSaveStatus('idle'), 2000);
+    }
+  };
+
+  const handleActorClick = (actorName: string) => {
+    const target = users.find((u) => u.name === actorName);
+    if (target) {
+      setSelectedUserId(target.id);
+      setActiveTab('users');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const updateTicketStatus = async (id: string, status: SupportTicket['status']) => {
@@ -1082,7 +1128,16 @@ export default function AdminDashboard() {
                             </div>
                             <span className="text-[11px] font-bold text-slate-400">{entry.time}</span>
                           </div>
-                          <p className="mt-2 text-[11px] font-bold text-slate-400">{entry.actor}</p>
+                          <button
+                            onClick={() => handleActorClick(entry.actor)}
+                            className={`mt-2 text-[11px] font-bold text-right transition-colors ${
+                              users.some((u) => u.name === entry.actor)
+                                ? 'text-brand-navy hover:underline cursor-pointer'
+                                : 'text-slate-400 cursor-default'
+                            }`}
+                          >
+                            {entry.actor}
+                          </button>
                         </div>
                       ))
                     )}
@@ -1292,7 +1347,16 @@ export default function AdminDashboard() {
                                   </div>
                                   <span className="text-[11px] font-bold text-slate-400">{entry.time}</span>
                                 </div>
-                                <p className="mt-2 text-[11px] font-bold text-slate-400">{entry.actor}</p>
+                                <button
+                                  onClick={() => handleActorClick(entry.actor)}
+                                  className={`mt-2 text-[11px] font-bold text-right transition-colors ${
+                                    users.some((u) => u.name === entry.actor)
+                                      ? 'text-brand-navy hover:underline cursor-pointer'
+                                      : 'text-slate-400 cursor-default'
+                                  }`}
+                                >
+                                  {entry.actor}
+                                </button>
                               </div>
                             ))
                           )}
@@ -1610,7 +1674,7 @@ export default function AdminDashboard() {
                                 onClick={() => navigate(`/profile/${application.id}`, { state: { lawyer: application } })}
                                 className="text-left text-sm font-semibold text-brand-navy underline-offset-4 transition hover:text-brand-dark hover:underline"
                               >
-                                {application.name}
+                                <HighlightText text={application.name} highlight={searchTerm} />
                               </button>
                               <div className="flex flex-wrap gap-2 text-[11px] text-gray-500">
                                 <span>{application.city}</span>
@@ -1708,7 +1772,16 @@ export default function AdminDashboard() {
                           </div>
                           <span className="text-[11px] font-bold text-slate-400">{entry.time}</span>
                         </div>
-                        <p className="mt-2 text-[11px] font-bold text-slate-400">{entry.actor}</p>
+                          <button
+                            onClick={() => handleActorClick(entry.actor)}
+                            className={`mt-2 text-[11px] font-bold text-right transition-colors ${
+                              users.some((u) => u.name === entry.actor)
+                                ? 'text-brand-navy hover:underline cursor-pointer'
+                                : 'text-slate-400 cursor-default'
+                            }`}
+                          >
+                            {entry.actor}
+                          </button>
                       </div>
                     ))}
                   </div>
@@ -1839,7 +1912,9 @@ export default function AdminDashboard() {
                         <div key={ticket.id} className="rounded-3xl bg-white p-5 border border-gray-200 shadow-sm">
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0">
-                              <p className="text-base font-semibold text-brand-dark truncate">{ticket.subject}</p>
+                              <p className="text-base font-semibold text-brand-dark truncate">
+                                <HighlightText text={ticket.subject} highlight={supportSearch} />
+                              </p>
                               <div className="mt-2 flex flex-wrap gap-2 text-[12px] text-gray-500">
                                 <span className="inline-flex items-center gap-2">
                                   <i className="fa-solid fa-user text-[10px]" />
@@ -1915,7 +1990,16 @@ export default function AdminDashboard() {
                             </div>
                             <span className="text-[11px] text-gray-400">{entry.time}</span>
                           </div>
-                          <p className="text-[11px] text-gray-400 mt-2">{entry.actor}</p>
+                          <button
+                            onClick={() => handleActorClick(entry.actor)}
+                            className={`mt-2 text-[11px] font-bold text-right transition-colors ${
+                              users.some((u) => u.name === entry.actor)
+                                ? 'text-brand-navy hover:underline cursor-pointer'
+                                : 'text-gray-400 cursor-default'
+                            }`}
+                          >
+                            {entry.actor}
+                          </button>
                         </div>
                       ))
                     )}
@@ -2345,7 +2429,16 @@ export default function AdminDashboard() {
                               </div>
                               <span className="text-[11px] font-bold text-slate-400">{entry.time}</span>
                             </div>
-                            <p className="mt-2 text-[11px] font-bold text-slate-400">{entry.actor}</p>
+                          <button
+                            onClick={() => handleActorClick(entry.actor)}
+                            className={`mt-2 text-[11px] font-bold text-right transition-colors ${
+                              users.some((u) => u.name === entry.actor)
+                                ? 'text-brand-navy hover:underline cursor-pointer'
+                                : 'text-slate-400 cursor-default'
+                            }`}
+                          >
+                            {entry.actor}
+                          </button>
                           </div>
                         ))}
                       </div>
@@ -2406,6 +2499,35 @@ export default function AdminDashboard() {
               </div>
             )}
         </div>
+
+        {/* Delete Confirmation Modal for Legal Docs */}
+        {docToDelete && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-brand-dark/40 backdrop-blur-sm px-4">
+            <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl text-right">
+              <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="fa-solid fa-triangle-exclamation text-3xl"></i>
+              </div>
+              <h3 className="text-xl font-bold text-brand-dark mb-2 text-center">حذف الوثيقة القانونية</h3>
+              <p className="text-gray-500 mb-8 text-center text-sm">
+                هل أنت متأكد من رغبتك في حذف هذا المرجع القانوني؟ قد يؤثر هذا على دقة نتائج البحث والذكاء الاصطناعي.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDocToDelete(null)}
+                  className="flex-1 py-3 px-4 border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50 transition"
+                >
+                  إلغاء
+                </button>
+                <button
+                  onClick={confirmDeleteDoc}
+                  className="flex-1 py-3 px-4 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition shadow-md shadow-red-500/20"
+                >
+                  تأكيد الحذف
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );
