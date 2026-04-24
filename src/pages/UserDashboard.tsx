@@ -1436,10 +1436,10 @@ export default function UserDashboard() {
   );
 
   return (
-    <div className="app-view fade-in">
+    <div className="app-view fade-in w-full max-w-full overflow-x-hidden">
       {/* Proactive Notification Banner */}
       <div className="mb-5 flex items-center justify-between rounded-2xl bg-brand-navy/95 backdrop-blur-md p-4 text-white shadow-lg shadow-brand-navy/20 animate-in slide-in-from-top duration-500 border border-white/10">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
             <i className="fa-solid fa-sparkles text-brand-gold"></i>
           </div>
@@ -1450,8 +1450,8 @@ export default function UserDashboard() {
 
       <div className="rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_70px_-40px_rgba(15,23,42,0.45)] overflow-hidden">
         <div className="border-b border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f8fafc_52%,#eef2ff_100%)] px-4 py-5 sm:px-6">
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,440px)] xl:items-start">
-            <div className="space-y-4 text-right">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,440px)] xl:items-start">
+            <div className="space-y-4 text-right min-w-0">
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <span className="inline-flex items-center rounded-full border border-brand-gold/20 bg-white/85 px-3 py-1 text-[11px] font-bold text-brand-navy">
                   <i className={`${activeTabMeta.icon} ml-2`}></i>
@@ -1497,7 +1497,7 @@ export default function UserDashboard() {
                 ))}
               </div>
             </div>
-            <div className="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+            <div className="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm min-w-0">
               <div className="flex flex-col gap-4">
                 <div className="text-right">
                   <p className="text-sm font-bold text-brand-dark">إجراءات وفلاتر سريعة</p>
@@ -1594,8 +1594,8 @@ export default function UserDashboard() {
           </div >
         </div >
 
-        <div className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
-          <div className="flex flex-wrap gap-2" role="tablist" aria-label="أقسام لوحة المستخدم">
+        <div className="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar p-1 bg-slate-50/80 rounded-3xl" role="tablist" aria-label="أقسام لوحة المستخدم">
             {DASHBOARD_TABS.map((tab) => (
               <button
                 key={tab.id}
@@ -1605,18 +1605,28 @@ export default function UserDashboard() {
                 id={`dashboard-tab-${tab.id}`}
                 aria-controls={`dashboard-panel-${tab.id}`}
                 onClick={() => setActiveTab(tab.id)}
-                className={`group relative inline-flex items-center gap-3 rounded-2xl border px-5 py-4 text-right transition-all ${activeTab === tab.id
-                  ? 'border-brand-navy bg-brand-navy text-white shadow-lg shadow-brand-navy/15'
-                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-brand-navy/30 hover:bg-white hover:text-brand-navy hover:shadow-md'
-                  }`}
+                className={`group relative flex min-w-[120px] md:min-w-[150px] items-center gap-3 rounded-[1.25rem] px-5 py-3 text-right transition-all duration-300 focus:outline-none ${
+                  activeTab === tab.id ? 'text-white' : 'text-slate-500 hover:text-brand-navy'
+                }`}
               >
-                <i className={`${tab.icon} transition-transform group-hover:scale-110`}></i>
-                <span>
-                  <span className="block text-sm font-bold">{tab.label}</span>
-                  <span className={`block text-[11px] ${activeTab === tab.id ? 'text-white/75' : 'text-slate-400'}`}>
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeUserDashboardTab"
+                    className="absolute inset-0 z-0 rounded-[1.25rem] bg-brand-navy shadow-lg shadow-brand-navy/20"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <div className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                  activeTab === tab.id ? 'bg-white/15' : 'bg-white shadow-sm border border-slate-100 group-hover:border-brand-navy/30'
+                }`}>
+                  <i className={`${tab.icon} text-xs ${activeTab === tab.id ? 'text-white' : 'text-brand-navy'}`}></i>
+                </div>
+                <div className="relative z-10 min-w-0">
+                  <p className="text-sm font-bold whitespace-nowrap">{tab.label}</p>
+                  <p className={`truncate text-[10px] font-bold ${activeTab === tab.id ? 'text-white/70' : 'text-slate-400'}`}>
                     {tab.description}
-                  </span>
-                </span>
+                  </p>
+                </div>
               </button>
             ))}
           </div>

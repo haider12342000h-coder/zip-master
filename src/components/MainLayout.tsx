@@ -275,6 +275,63 @@ export default function MainLayout() {
         </div>
       </header>
 
+      {/* Enhanced Mobile Navigation Overlay */}
+      <AnimatePresence>
+        {mobileNavOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed inset-0 z-[45] flex flex-col bg-white/95 px-6 pt-24 backdrop-blur-md xl:hidden"
+          >
+            <nav className="flex flex-col gap-2">
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setMobileNavOpen(false)}
+                    className={`flex items-center gap-4 rounded-2xl p-4 transition-all ${
+                      isActive
+                        ? 'bg-brand-navy text-white shadow-lg shadow-brand-navy/20'
+                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isActive ? 'bg-white/20' : 'bg-white shadow-sm border border-slate-100'}`}>
+                      <i className={`fa-solid ${item.icon} ${isActive ? 'text-white' : 'text-brand-navy'}`}></i>
+                    </div>
+                    <span className="text-lg font-black">{item.name}</span>
+                    {isActive && <i className="fa-solid fa-chevron-left mr-auto text-xs opacity-50"></i>}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="mt-auto mb-10 space-y-6 pt-8 border-t border-slate-100">
+              <div className="flex flex-row-reverse items-center gap-4 px-2">
+                <img src={user?.img || 'https://i.pravatar.cc/150'} className="h-14 w-14 rounded-2xl border-2 border-white shadow-lg" alt="" />
+                <div className="text-right">
+                  <p className="text-lg font-black text-brand-dark">{user?.name}</p>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{user?.roleDescription}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <button onClick={() => { navigate('/settings'); setMobileNavOpen(false); }} className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-slate-100 p-5 text-slate-600 transition hover:bg-slate-200">
+                  <i className="fa-regular fa-user-circle text-xl"></i>
+                  <span className="text-xs font-black">الإعدادات</span>
+                </button>
+                <button onClick={handleLogout} className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-red-50 p-5 text-red-500 transition hover:bg-red-100">
+                  <i className="fa-solid fa-arrow-right-from-bracket text-xl"></i>
+                  <span className="text-xs font-black">تسجيل الخروج</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Dynamic Breadcrumbs */}
       <div className="mx-auto w-full max-w-[1440px] px-4 pt-4 sm:px-6 lg:px-8">
         <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 overflow-x-auto no-scrollbar whitespace-nowrap">
