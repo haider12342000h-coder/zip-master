@@ -526,6 +526,21 @@ async function startServer() {
     }
   });
 
+  // Persist Private Notes for Lawyers
+  app.patch('/api/app/workspace/cases/:id/private-note', authenticateToken, async (req, res) => {
+    try {
+      const { note } = req.body;
+      const updated = await prisma.case.update({
+        where: { id: req.params.id },
+        data: { privateNote: note }
+      });
+      res.json({ data: updated });
+    } catch (error) {
+      console.error('Update private note error:', error);
+      res.status(500).json({ error: 'Failed to update private note' });
+    }
+  });
+
   app.post('/api/app/workspace/cases/:id/archive', authenticateToken, async (req, res) => {
     try {
       res.json({ data: await toggleCaseArchive(req.params.id) });
@@ -1145,7 +1160,7 @@ async function startServer() {
   }
 
   httpServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running. Local: http://localhost:${PORT} | Network: Accessible via your IP on port ${PORT}`);
   });
 }
 

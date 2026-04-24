@@ -28,6 +28,7 @@ interface CaseRecord {
   billableHours: number;
   outstandingInvoice: number;
   isPinned: boolean;
+  privateNote?: string;
 }
 
 interface ClientRecord {
@@ -444,6 +445,7 @@ export default function ProDashboard() {
   const [aiResponse, setAiResponse] = useState('هنا يظهر ملخص الذكاء الاصطناعي بعد التشغيل، مع أهم النقاط والإجراءات المقترحة.');
   const [isAiRunning, setIsAiRunning] = useState(false);
   const [replyDraft, setReplyDraft] = useState('');
+  const [caseNote, setCaseNote] = useState('');
   const [workbenchReply, setWorkbenchReply] = useState('');
   const [activeSavedView, setActiveSavedView] = useState<SavedViewId>('urgent-today');
 
@@ -456,6 +458,11 @@ export default function ProDashboard() {
   const selectedCase = cases.find(caseItem => caseItem.id === selectedCaseId) ?? cases[0];
   const selectedVaultDoc = vaultDocs.find(doc => doc.id === selectedVaultDocId) ?? vaultDocs[0];
   const selectedInboxMessage = inboxMessages.find(message => message.id === activeMessageId) ?? inboxMessages[0];
+
+  useEffect(() => {
+    const current = cases.find(c => c.id === selectedCaseId);
+    setCaseNote(current?.privateNote || '');
+  }, [selectedCaseId, cases]);
 
   const caseRelatedDocs = useMemo(() => vaultDocs.filter(d => d.caseTitle === selectedCase?.title), [vaultDocs, selectedCase]);
   const caseRelatedMessages = useMemo(() => inboxMessages.filter(m => m.caseTitle === selectedCase?.title), [inboxMessages, selectedCase]);
@@ -824,13 +831,42 @@ export default function ProDashboard() {
     setReplyDraft(`${prefix}${template}`);
   };
 
+  const handleUpdateCaseProgress = async (caseId: string, progress: number) => {
+    try {
+      // Assuming an API endpoint exists or using bulk update pattern
+      setCases(prev => prev.map(c => c.id === caseId ? { ...c, progress } : c));
+      setQuickActionNote(`تم تحديث تقدم القضية إلى ${progress}%.`);
+    } catch (err) {
+      console.error("Failed to update progress", err);
+    }
+  };
+
   const handleUpdateCaseStatus = async (caseId: string, newStatus: CaseRecord['status']) => {
     try {
       await apiClient.bulkUpdateProCaseStatus([caseId], newStatus);
       setCases(prev => prev.map(c => c.id === caseId ? { ...c, status: newStatus } : c));
-      setQuickActionNote(`تم تحديث حالة القضية إلى ${newStatus}.`);
+      setQuickActionNote(`تم تغيير حالة الملف إلى: ${newStatus}.`);
     } catch (err) {
       console.error("Failed to update status", err);
+    }
+  };
+
+  const handleSavePrivateNote = async () => {
+    if (!selectedCase) return;
+    try {
+      const token = localStorage.getItem('lexigate_token');
+      await fetch(`/api/app/workspace/cases/${selectedCase.id}/private-note`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ note: caseNote })
+      });
+      setCases(prev => prev.map(c => c.id === selectedCase.id ? { ...c, privateNote: caseNote } : c));
+      setQuickActionNote('تم حفظ الملاحظة الخاصة بنجاح.');
+    } catch (err) {
+      console.error("Failed to save note", err);
     }
   };
 
@@ -853,7 +889,7 @@ export default function ProDashboard() {
         <div className="flex flex-row-reverse items-center gap-4">
           <button
             onClick={() => setCaseViewMode('list')}
-            className="h-10 w-10 shrink-0 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-brand-navy hover:bg-brand-navy/5 transition-all"
+            className="h-10 w-10 shrink-0 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-brand-navy hover:bg-brand-navy/5 transition-all border border-slate-100"
           >
             <i className="fa-solid fa-arrow-right"></i>
           </button>
@@ -893,25 +929,28 @@ export default function ProDashboard() {
             {isTimerRunning && activeTimerCaseId === selectedCase.id ? 'إيقاف الفوترة' : 'بدء التوقيت'}
           </button>
           <button className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-black text-slate-600 hover:bg-slate-50 transition">تصدير التقرير</button>
-          <button className="rounded-xl bg-brand-navy px-5 py-2.5 text-xs font-black text-white shadow-lg shadow-brand-navy/20 hover:bg-brand-dark transition">تحديث الحالة</button>
         </div>
       </section>
 
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-6">
         <div className="space-y-6">
-          {/* Split View: Documents & Messages */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Documents Workbench */}
             <SurfaceCard
               title="مستندات القضية"
               description="المسودات، التوكيلات، والأدلة المرفوعة."
-              actions={<button onClick={handleVaultUpload} className="text-xs font-black text-brand-navy hover:underline">رفع جديد</button>}
+              actions={<button onClick={handleVaultUpload} className="flex items-center gap-1.5 rounded-lg bg-brand-navy/5 px-3 py-1.5 text-[10px] font-black text-brand-navy hover:bg-brand-navy/10 transition">
+                <i className="fa-solid fa-plus text-[8px]"></i>
+                رفع جديد
+              </button>}
             >
               <div className="space-y-3">
-                {caseRelatedDocs.map(doc => (
+                {caseRelatedDocs.length > 0 ? caseRelatedDocs.map(doc => (
                   <div key={doc.id} className="flex flex-row-reverse items-center justify-between p-3 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white transition-all group">
                     <div className="flex flex-row-reverse items-center gap-3">
-                      <i className={`fa-solid ${getFileIcon(doc.type).split(' ')[0]} ${getFileIcon(doc.type).split(' ')[1]} text-lg opacity-70`}></i>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm transition-transform group-hover:scale-110">
+                        <i className={`fa-solid ${getFileIcon(doc.type).split(' ')[0]} ${getFileIcon(doc.type).split(' ')[1]} text-lg`}></i>
+                      </div>
                       <div className="text-right">
                         <p className="text-xs font-black text-brand-dark truncate max-w-[100px] sm:max-w-none">{doc.name}</p>
                         <p className="text-[10px] font-bold text-slate-400">{doc.date}</p>
@@ -919,7 +958,12 @@ export default function ProDashboard() {
                     </div>
                     <span className={`rounded-full px-2 py-0.5 text-[8px] font-black ${vaultStatusClassMap[doc.status]}`}>{vaultStatusLabelMap[doc.status]}</span>
                   </div>
-                ))}
+                )) : (
+                  <div className="py-12 text-center text-slate-300">
+                    <i className="fa-solid fa-folder-open mb-3 block text-3xl opacity-20"></i>
+                    <p className="text-xs font-bold">لا توجد مستندات بعد</p>
+                  </div>
+                )}
               </div>
             </SurfaceCard>
 
@@ -929,16 +973,21 @@ export default function ProDashboard() {
               description="آخر التوجيهات والطلبات المتبادلة."
               className="flex flex-col"
             >
-              <div className="space-y-4 max-h-[260px] sm:max-h-[300px] overflow-y-auto pl-2 pr-1 mb-4 custom-scrollbar">
-                {caseRelatedMessages.map(msg => (
-                  <div key={msg.id} className={`flex flex-col ${msg.unread ? 'bg-brand-navy/[0.03] -mx-2 px-2 py-2 rounded-xl' : ''}`}>
-                    <div className="flex flex-row-reverse items-center justify-between mb-1">
-                      <span className="text-xs font-black text-brand-dark">{msg.name}</span>
-                      <span className="text-[9px] font-bold text-slate-400">{msg.time}</span>
+              <div className="space-y-4 max-h-[260px] sm:max-h-[300px] overflow-y-auto px-1 mb-4 custom-scrollbar flex flex-col">
+                {caseRelatedMessages.length > 0 ? caseRelatedMessages.map(msg => (
+                  <div key={msg.id} className={`max-w-[85%] rounded-2xl p-3 text-right shadow-sm ${msg.name === user?.name ? 'self-end bg-brand-navy text-white' : 'self-start bg-slate-100 text-slate-700'}`}>
+                    <div className="flex items-center justify-between gap-4 mb-1 opacity-70">
+                      <span className="text-[9px] font-bold">{msg.time}</span>
+                      <span className="text-[10px] font-black">{msg.name === user?.name ? 'أنت' : msg.name}</span>
                     </div>
-                    <p className="text-xs font-bold text-slate-600 leading-relaxed text-right">{msg.text}</p>
+                    <p className="text-xs font-bold leading-relaxed">{msg.text}</p>
                   </div>
-                ))}
+                )) : (
+                  <div className="py-12 text-center text-slate-300">
+                    <i className="fa-solid fa-comments mb-3 block text-3xl opacity-20"></i>
+                    <p className="text-xs font-bold">ابدأ المحادثة مع العميل</p>
+                  </div>
+                )}
               </div>
               <div className="mt-auto border-t border-slate-100 pt-4">
                 <div className="flex gap-1.5 mb-3 overflow-x-auto no-scrollbar pb-1">
@@ -1004,19 +1053,34 @@ export default function ProDashboard() {
 
         {/* Right Info Bar */}
         <div className="space-y-6">
-          <SurfaceCard title="سلامة الملف (Integrity)">
-            <div className="space-y-3">
-              {[
-                { label: 'الوكالة القانونية', done: true },
-                { label: 'هوية العميل الموثقة', done: true },
-                { label: 'دفع الرسوم الأولية', done: false },
-                { label: 'عقد الأتعاب الموقع', done: false },
-              ].map((item, i) => (
-                <div key={i} className="flex flex-row-reverse items-center justify-between text-[11px] font-black">
-                  <span className={item.done ? 'text-slate-600' : 'text-red-500'}>{item.label}</span>
-                  <i className={`fa-solid ${item.done ? 'fa-circle-check text-emerald-500' : 'fa-circle-exclamation text-slate-200'}`}></i>
+          <SurfaceCard title="التقدم التشغيلي">
+            <div className="space-y-6">
+              <div>
+                <div className="flex items-center justify-between mb-3 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                  <span>{selectedCase.progress}% مكتمل</span>
+                  <span>نسبة الإنجاز</span>
                 </div>
-              ))}
+                <input 
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={selectedCase.progress}
+                  onChange={(e) => handleUpdateCaseProgress(selectedCase.id, parseInt(e.target.value))}
+                  className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-brand-gold"
+                />
+              </div>
+              <div className="space-y-3 border-t border-slate-50 pt-4">
+                {[
+                  { label: 'الوكالة القانونية', done: true },
+                  { label: 'هوية العميل الموثقة', done: true },
+                  { label: 'دفع الرسوم الأولية', done: false },
+                ].map((item, i) => (
+                  <div key={i} className="flex flex-row-reverse items-center justify-between text-[11px] font-black">
+                    <span className={item.done ? 'text-slate-600' : 'text-red-500'}>{item.label}</span>
+                    <i className={`fa-solid ${item.done ? 'fa-circle-check text-emerald-500' : 'fa-circle-exclamation text-slate-200'}`}></i>
+                  </div>
+                ))}
+              </div>
             </div>
           </SurfaceCard>
 
@@ -1055,6 +1119,23 @@ export default function ProDashboard() {
                 <span className="text-xs font-bold text-slate-500">بانتظار التحصيل</span>
               </div>
               <button className="w-full mt-2 py-3 rounded-xl bg-brand-navy/[0.05] text-brand-navy text-[11px] font-black hover:bg-brand-navy/[0.08] transition">إصدار فاتورة مرحلية</button>
+            </div>
+          </SurfaceCard>
+
+          <SurfaceCard title="ملاحظات خاصة" description="مساحة لرؤى المحامي (لا تظهر للعميل).">
+            <div className="space-y-3">
+              <textarea
+                value={caseNote}
+                onChange={(e) => setCaseNote(e.target.value)}
+                placeholder="أدخل ملاحظاتك الخاصة هنا..."
+                className="w-full h-32 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs font-bold text-slate-700 text-right focus:border-brand-navy focus:bg-white outline-none resize-none transition-all shadow-inner"
+              />
+              <button 
+                onClick={handleSavePrivateNote}
+                className="w-full py-2.5 rounded-xl bg-brand-gold text-brand-dark text-[11px] font-black hover:bg-yellow-500 transition shadow-md"
+              >
+                حفظ الملاحظة
+              </button>
             </div>
           </SurfaceCard>
         </div>
