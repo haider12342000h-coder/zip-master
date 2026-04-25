@@ -299,116 +299,70 @@ export async function updateUserProfile(id: string, updates: Partial<UserRecord>
     }
 }
 
-export function updateUserRole(id: string, role: UserRecord['role']): UserRecord | null {
-    const index = users.findIndex((user: UserRecord) => user.id === id);
-    if (index < 0) {
-        return null;
-    }
-    users[index] = { ...users[index], role };
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'تحديث صلاحية المستخدم',
-        actor: 'مدير النظام',
-        message: `تم تحديث صلاحية ${users[index].name} إلى ${role}.`,
-        time: 'الآن',
+export async function updateUserRole(id: string, role: string) {
+    const updated = await prisma.user.update({
+        where: { id },
+        data: { role: role as any }
     });
-    return users[index];
+    return getUserById(updated.id);
 }
 
-export function toggleUserBlock(id: string): UserRecord | null {
-    const index = users.findIndex((user: UserRecord) => user.id === id);
-    if (index < 0) {
-        return null;
-    }
-    users[index] = { ...users[index], blocked: !users[index].blocked };
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'security',
-        category: users[index].blocked ? 'حظر مستخدم' : 'رفع حظر مستخدم',
-        actor: 'مدير النظام',
-        message: `${users[index].blocked ? 'تم حظر' : 'تم رفع الحظر عن'} ${users[index].name}.`,
-        time: 'الآن',
+export async function toggleUserBlock(id: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return null;
+    const updated = await prisma.user.update({
+        where: { id },
+        data: { blocked: !user.blocked }
     });
-    return users[index];
+    return getUserById(updated.id);
 }
 
-export function getFeatureFlags(): FeatureFlag[] {
-    return featureFlags;
+export async function getFeatureFlags(): Promise<FeatureFlag[]> {
+    return prisma.featureFlag.findMany() as any;
 }
 
-export function updateFeatureFlag(key: string, enabled: boolean): FeatureFlag | null {
-    const index = featureFlags.findIndex((flag: FeatureFlag) => flag.key === key);
-    if (index < 0) {
-        return null;
-    }
-    featureFlags[index] = { ...featureFlags[index], enabled };
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'تحديث علم ميزة',
-        actor: 'مدير النظام',
-        message: `${featureFlags[index].label} تم ${enabled ? 'تمكينه' : 'تعطيله'}.`,
-        time: 'الآن',
-    });
-    return featureFlags[index];
+export async function updateFeatureFlag(key: string, enabled: boolean) {
+    return prisma.featureFlag.update({
+        where: { key },
+        data: { enabled }
+    }) as any;
 }
 
-export function getSupportTickets(): SupportTicket[] {
-    return supportTickets;
+export async function getSupportTickets(): Promise<SupportTicket[]> {
+    return prisma.supportTicket.findMany({ orderBy: { createdAt: 'desc' } }) as any;
 }
 
-export function updateSupportTicket(id: string, status: SupportTicket['status']): SupportTicket | null {
-    const index = supportTickets.findIndex((ticket: SupportTicket) => ticket.id === id);
-    if (index < 0) {
-        return null;
-    }
-    supportTickets[index] = { ...supportTickets[index], status };
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'تحديث تذكرة الدعم',
-        actor: 'مدير النظام',
-        message: `تم تغيير حالة التذكرة ${supportTickets[index].subject} إلى ${status}.`,
-        time: 'الآن',
-    });
-    return supportTickets[index];
+export async function updateSupportTicket(id: string, status: string) {
+    return prisma.supportTicket.update({
+        where: { id },
+        data: { status: status as any }
+    }) as any;
 }
 
-export function getPolicies(): PolicySetting[] {
-    return systemPolicies;
+export async function getPolicies(): Promise<PolicySetting[]> {
+    return prisma.policySetting.findMany() as any;
 }
 
-export function updatePolicySetting(key: string, value: string): PolicySetting | null {
-    const index = systemPolicies.findIndex((policy: PolicySetting) => policy.key === key);
-    if (index < 0) {
-        return null;
-    }
-    systemPolicies[index] = { ...systemPolicies[index], value };
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'تغيير سياسة',
-        actor: 'مدير النظام',
-        message: `تم تحديث ${systemPolicies[index].label} إلى ${value}.`,
-        time: 'الآن',
-    });
-    return systemPolicies[index];
+export async function updatePolicySetting(key: string, value: string) {
+    return prisma.policySetting.update({
+        where: { key },
+        data: { value }
+    }) as any;
 }
 
-export function getSecurityAlerts(): SecurityAlert[] {
-    return securityAlerts;
+export async function getSecurityAlerts(): Promise<SecurityAlert[]> {
+    return prisma.securityAlert.findMany({ orderBy: { createdAt: 'desc' } }) as any;
 }
 
-export function getAuditLogs(type?: string): AuditRecord[] {
-    if (!type || type === 'all') {
-        return auditLogs;
-    }
-    return auditLogs.filter((record) => record.type === type);
+export async function getAuditLogs(type?: string): Promise<AuditRecord[]> {
+    return prisma.auditLog.findMany({
+        where: type && type !== 'all' ? { type: type as any } : undefined,
+        orderBy: { createdAt: 'desc' }
+    }) as any;
 }
 
-export function getTransactionRecords(): TransactionRecord[] {
-    return transactionRecords;
+export async function getTransactionRecords(): Promise<TransactionRecord[]> {
+    return prisma.transaction.findMany({ orderBy: { createdAt: 'desc' } }) as any;
 }
 
 export function getExportCsv(type: 'kyc' | 'transactions'): string {
@@ -429,244 +383,100 @@ export function getExportCsv(type: 'kyc' | 'transactions'): string {
     return `${header}${rows}`;
 }
 
-export function getSystemSettings(): SystemSettings {
-    return systemSettings;
+export async function getSystemSettings(): Promise<SystemSettings> {
+    return prisma.systemSetting.findFirst() as any;
 }
 
-export function updateSystemSettings(settings: Partial<SystemSettings>): SystemSettings {
-    Object.assign(systemSettings, settings);
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'تحديث إعدادات النظام',
-        actor: 'مدير النظام',
-        message: `تم تحديث إعدادات النظام الرئيسية.`,
-        time: 'الآن',
-    });
-    return systemSettings;
+export async function updateSystemSettings(settings: Partial<SystemSettings>) {
+    const current = await prisma.systemSetting.findFirst();
+    return prisma.systemSetting.update({
+        where: { id: current?.id },
+        data: settings
+    }) as any;
 }
 
-export function getAiSettings(): AiSettings {
-    return aiSettings;
+export async function getAiSettings(): Promise<AiSettings> {
+    return prisma.aiSetting.findFirst() as any;
 }
 
-export function updateAiSettings(settings: Partial<AiSettings>): AiSettings {
-    Object.assign(aiSettings, settings);
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'تحديث إعدادات الذكاء الاصطناعي',
-        actor: 'مدير النظام',
-        message: `تم تحديث إعدادات الذكاء الاصطناعي.`,
-        time: 'الآن',
-    });
-    return aiSettings;
+export async function updateAiSettings(settings: Partial<AiSettings>) {
+    const current = await prisma.aiSetting.findFirst();
+    return prisma.aiSetting.update({
+        where: { id: current?.id },
+        data: settings
+    }) as any;
 }
 
-export function getPaymentGateways(): PaymentGateway[] {
-    return paymentGateways;
+export async function getPaymentGateways(): Promise<PaymentGateway[]> {
+    return prisma.paymentGateway.findMany() as any;
 }
 
-export function updatePaymentGateway(key: string, enabled: boolean, feePercent?: number): PaymentGateway | null {
-    const index = paymentGateways.findIndex((gateway) => gateway.key === key);
-    if (index < 0) {
-        return null;
-    }
-    paymentGateways[index] = {
-        ...paymentGateways[index],
-        enabled,
-        feePercent: feePercent !== undefined ? feePercent : paymentGateways[index].feePercent,
-    };
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'تحديث بوابة الدفع',
-        actor: 'مدير النظام',
-        message: `تم تحديث بوابة الدفع ${paymentGateways[index].label}.`,
-        time: 'الآن',
-    });
-    return paymentGateways[index];
+export async function updatePaymentGateway(key: string, enabled: boolean, feePercent?: number) {
+    return prisma.paymentGateway.update({
+        where: { key },
+        data: { enabled, feePercent }
+    }) as any;
 }
 
-export function getWorkflowSettings(): WorkflowSettings {
-    return workflowSettings;
+export async function getWorkflowSettings(): Promise<WorkflowSettings> {
+    return prisma.workflowSetting.findFirst() as any;
 }
 
-export function updateWorkflowSettings(settings: Partial<WorkflowSettings>): WorkflowSettings {
-    Object.assign(workflowSettings, settings);
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'تحديث إعدادات سير العمل',
-        actor: 'مدير النظام',
-        message: `تم تحديث إعدادات سير العمل.`,
-        time: 'الآن',
-    });
-    return workflowSettings;
+export async function updateWorkflowSettings(settings: Partial<WorkflowSettings>) {
+    const current = await prisma.workflowSetting.findFirst();
+    return prisma.workflowSetting.update({
+        where: { id: current?.id },
+        data: settings
+    }) as any;
 }
 
-export function getNotificationTemplates(): NotificationTemplate[] {
-    return notificationTemplates;
+export async function getNotificationTemplates(): Promise<NotificationTemplate[]> {
+    return prisma.notificationTemplate.findMany() as any;
 }
 
-export function updateNotificationTemplate(key: string, partial: Partial<NotificationTemplate>): NotificationTemplate | null {
-    const index = notificationTemplates.findIndex((template) => template.key === key);
-    if (index < 0) {
-        return null;
-    }
-    notificationTemplates[index] = {
-        ...notificationTemplates[index],
-        ...partial,
-    };
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'تحديث رسالة النظام',
-        actor: 'مدير النظام',
-        message: `تم تحديث ${notificationTemplates[index].label}.`,
-        time: 'الآن',
-    });
-    return notificationTemplates[index];
+export async function updateNotificationTemplate(key: string, partial: Partial<NotificationTemplate>) {
+    return prisma.notificationTemplate.update({
+        where: { key },
+        data: partial
+    }) as any;
 }
 
-export function getModerationRules(): ModerationRule[] {
-    return moderationRules;
+export async function getModerationRules(): Promise<ModerationRule[]> {
+    return prisma.moderationRule.findMany() as any;
 }
 
-export function updateModerationRule(id: string, partial: Partial<ModerationRule>): ModerationRule | null {
-    const index = moderationRules.findIndex((rule: ModerationRule) => rule.id === id);
-    if (index < 0) {
-        return null;
-    }
-    moderationRules[index] = {
-        ...moderationRules[index],
-        ...partial,
-    };
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'تحديث قواعد المراقبة',
-        actor: 'مدير النظام',
-        message: `تم تحديث قاعدة ${moderationRules[index].value}.`,
-        time: 'الآن',
-    });
-    return moderationRules[index];
+export async function updateModerationRule(id: string, partial: Partial<ModerationRule>) {
+    return prisma.moderationRule.update({
+        where: { id },
+        data: partial
+    }) as any;
 }
 
-export function addModerationRule(rule: Omit<ModerationRule, 'id'>): ModerationRule {
-    const newRule: ModerationRule = {
-        id: `m-${Date.now()}`,
-        ...rule,
-    };
-    moderationRules.unshift(newRule);
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'قواعد المراقبة',
-        actor: 'مدير النظام',
-        message: `تمت إضافة قاعدة ${newRule.value}.`,
-        time: 'الآن',
-    });
-    return newRule;
+export async function addModerationRule(rule: Omit<ModerationRule, 'id'>) {
+    return prisma.moderationRule.create({ data: rule }) as any;
 }
 
-export function deleteModerationRule(id: string): boolean {
-    const index = moderationRules.findIndex((rule) => rule.id === id);
-    if (index < 0) {
-        return false;
-    }
-    const deleted = moderationRules.splice(index, 1)[0];
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'قواعد المراقبة',
-        actor: 'مدير النظام',
-        message: `تمت إزالة قاعدة ${deleted.value}.`,
-        time: 'الآن',
-    });
+export async function deleteModerationRule(id: string) {
+    await prisma.moderationRule.delete({ where: { id } });
     return true;
 }
 
-export function getLegalDocs(): LegalDoc[] {
-    return legalDocs;
+export async function getLegalDocs(): Promise<LegalDoc[]> {
+    return prisma.legalDoc.findMany() as any;
 }
 
-export function addLegalDoc(doc: Omit<LegalDoc, 'id'>): LegalDoc {
-    const newDoc: LegalDoc = { id: `law-${Date.now()}`, ...doc };
-    legalDocs.unshift(newDoc);
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'إدارة مصادر الوثائق',
-        actor: 'مدير النظام',
-        message: `تمت إضافة وثيقة قانونية جديدة: ${newDoc.title}.`,
-        time: 'الآن',
-    });
-    return newDoc;
+export async function addLegalDoc(doc: Omit<LegalDoc, 'id'>) {
+    return prisma.legalDoc.create({ data: doc }) as any;
 }
 
-export function updateLegalDoc(id: string, settings: Partial<Omit<LegalDoc, 'id'>>): LegalDoc | null {
-    const index = legalDocs.findIndex((doc: LegalDoc) => doc.id === id);
-    if (index < 0) {
-        return null;
-    }
-    legalDocs[index] = { ...legalDocs[index], ...settings };
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'إدارة مصادر الوثائق',
-        actor: 'مدير النظام',
-        message: `تم تحديث الوثيقة القانونية ${legalDocs[index].title}.`,
-        time: 'الآن',
-    });
-    return legalDocs[index];
+export async function updateLegalDoc(id: string, settings: Partial<Omit<LegalDoc, 'id'>>) {
+    return prisma.legalDoc.update({
+        where: { id },
+        data: settings
+    }) as any;
 }
 
-export function deleteLegalDoc(id: string): boolean {
-    const index = legalDocs.findIndex((doc: LegalDoc) => doc.id === id);
-    if (index < 0) {
-        return false;
-    }
-    const deleted = legalDocs.splice(index, 1)[0];
-    auditLogs.unshift({
-        id: `l-${Date.now()}`,
-        type: 'system',
-        category: 'إدارة مصادر الوثائق',
-        actor: 'مدير النظام',
-        message: `تم حذف الوثيقة القانونية ${deleted.title}.`,
-        time: 'الآن',
-    });
+export async function deleteLegalDoc(id: string) {
+    await prisma.legalDoc.delete({ where: { id } });
     return true;
 }
-
-// Mock data definitions
-let users: UserRecord[] = [];
-let auditLogs: AuditRecord[] = [];
-let featureFlags: FeatureFlag[] = [];
-let supportTickets: SupportTicket[] = [];
-let systemPolicies: PolicySetting[] = [];
-let securityAlerts: SecurityAlert[] = [];
-let transactionRecords: TransactionRecord[] = [];
-let kycApplications: KycApplication[] = [];
-let systemSettings: SystemSettings = {
-    maintenanceMode: false,
-    announcement: '',
-    offlineMessage: '',
-    supportEmail: ''
-};
-let aiSettings: AiSettings = {
-    enabled: true,
-    topK: 5,
-    fallbackMode: false,
-    maxTokens: 1000
-};
-let paymentGateways: PaymentGateway[] = [];
-let workflowSettings: WorkflowSettings = {
-    allowNewCases: true,
-    enforceSignedDocs: false,
-    autoAssignLawyers: false,
-    openCasesPerLawyer: 10
-};
-let notificationTemplates: NotificationTemplate[] = [];
-let moderationRules: ModerationRule[] = [];
-let legalDocs: LegalDoc[] = [];

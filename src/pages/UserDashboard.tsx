@@ -121,199 +121,6 @@ const HEADER_FOCUS_OPTIONS: Array<{ value: HeaderFocus; label: string }> = [
   { value: 'pending', label: 'بانتظارك' },
 ];
 
-const CASES: CaseItem[] = [
-  {
-    id: 'case-1',
-    title: 'مراجعة عقد إيجار تجاري',
-    subtitle: 'العقد وصل إلى مرحلة المراجعة النهائية',
-    progress: 70,
-    status: 'قيد المراجعة',
-    urgency: 'متوسط',
-    nextStep: 'تأكيد الملاحظات النهائية على البند السادس',
-    lawyer: 'د. عمر النعيمي',
-    deadline: 'غداً 11:00 ص',
-    icon: 'fa-solid fa-file-contract',
-    tone: 'bg-blue-50 text-blue-600',
-    milestones: [
-      { id: 'ms1', label: 'تجهيز الملف', status: 'completed' },
-      { id: 'ms2', label: 'المراجعة الأولى', status: 'completed' },
-      { id: 'ms3', label: 'مراجعة الملاحظات', status: 'current' },
-      { id: 'ms4', label: 'الاعتماد النهائي', status: 'upcoming' },
-    ],
-  },
-  {
-    id: 'case-2',
-    title: 'استشارة تسجيل علامة تجارية',
-    subtitle: 'تم تجهيز الرد وتحتاج إلى الاطلاع',
-    progress: 100,
-    status: 'جاهزة',
-    urgency: 'منخفض',
-    nextStep: 'قراءة التوصيات النهائية وتحميل المرفقات',
-    lawyer: 'سجا كاظم',
-    deadline: 'اليوم 05:30 م',
-    icon: 'fa-solid fa-check-double',
-    tone: 'bg-green-50 text-green-600',
-    unread: true,
-    milestones: [
-      { id: 'ms1', label: 'تقديم الطلب', status: 'completed' },
-      { id: 'ms2', label: 'الفحص الشكلي', status: 'completed' },
-      { id: 'ms3', label: 'النشر للإعلان', status: 'completed' },
-      { id: 'ms4', label: 'قرار التسجيل', status: 'completed' },
-    ],
-  },
-  {
-    id: 'case-3',
-    title: 'مطالبة مالية ضد جهة متعاقدة',
-    subtitle: 'ينتظر الفريق رفع الوثائق الداعمة',
-    progress: 40,
-    status: 'بانتظارك',
-    urgency: 'عالي',
-    nextStep: 'رفع كشف الحساب ونسخة المطالبة',
-    lawyer: 'علي الجبوري',
-    deadline: 'بعد 2 يوم',
-    icon: 'fa-solid fa-scale-balanced',
-    tone: 'bg-amber-50 text-amber-600',
-    milestones: [
-      { id: 'ms1', label: 'تسجيل المطالبة', status: 'completed' },
-      { id: 'ms2', label: 'رفع المستندات', status: 'current' },
-      { id: 'ms3', label: 'مراجعة الفريق', status: 'upcoming' },
-      { id: 'ms4', label: 'الإحالة للمحكمة', status: 'upcoming' },
-    ],
-  },
-];
-
-const LEGAL_SERVICES: LegalService[] = [
-  {
-    id: 'srv-1',
-    title: 'تأسيس شركة محدودة',
-    description: 'صياغة عقد التأسيس، مراجعة السجل التجاري، والحصول على شهادة التسجيل النهائية.',
-    icon: 'fa-solid fa-building-circle-check',
-    price: '750,000 د.ع',
-    time: '14 - 21 يوم',
-    color: 'indigo',
-    category: 'تجاري',
-  },
-  {
-    id: 'srv-2',
-    title: 'تسجيل علامة تجارية',
-    description: 'حماية هويتك البصرية، فحص التشابه، وإيداع طلب التسجيل في وزارة الصناعة.',
-    icon: 'fa-solid fa-copyright',
-    price: '450,000 د.ع',
-    time: '30 - 60 يوم',
-    color: 'rose',
-    category: 'ملكية فكرية',
-  },
-  {
-    id: 'srv-3',
-    title: 'توثيق عقد عقاري',
-    description: 'مراجعة سند الملكية، صياغة اتفاقية البيع، وتوثيق الإجراءات أمام كاتب العدل.',
-    icon: 'fa-solid fa-house-shield',
-    price: '250,000 د.ع',
-    time: '3 - 5 أيام',
-    color: 'amber',
-    category: 'عقارات',
-  },
-  {
-    id: 'srv-4',
-    title: 'مراجعة العقود والاتفاقيات',
-    description: 'تحليل المخاطر القانونية، تعديل البنود المجحفة، وضمان الامتثال للقوانين العراقية.',
-    icon: 'fa-solid fa-file-signature',
-    price: '100,000 د.ع',
-    time: '48 ساعة',
-    color: 'blue',
-    category: 'استشارات',
-  },
-];
-
-const DOCUMENTS: DocumentItem[] = [
-  { id: 'doc-1', name: 'عقد الإيجار التجاري.pdf', type: 'PDF', caseName: 'مراجعة عقد إيجار تجاري', updatedAt: 'اليوم', status: 'قيد المراجعة' },
-  { id: 'doc-2', name: 'هوية صاحب العلامة.jpg', type: 'صورة', caseName: 'استشارة تسجيل علامة تجارية', updatedAt: 'أمس', status: 'مكتمل' },
-  { id: 'doc-3', name: 'كشف الحساب البنكي', type: 'مطلوب', caseName: 'مطالبة مالية ضد جهة متعاقدة', updatedAt: 'مطلوب الآن', status: 'مطلوب' },
-];
-
-const SCHEDULE: ScheduleItem[] = [
-  { id: 'sch-1', title: 'مكالمة متابعة مع المحامي', time: 'اليوم 07:00 م', type: 'اتصال', caseName: 'مراجعة عقد إيجار تجاري' },
-  { id: 'sch-2', title: 'موعد تسليم مرفقات العلامة التجارية', time: 'غداً 10:00 ص', type: 'تسليم', caseName: 'استشارة تسجيل علامة تجارية' },
-  { id: 'sch-3', title: 'تذكير برفع الوثائق الناقصة', time: 'بعد 2 يوم', type: 'تذكير', caseName: 'مطالبة مالية ضد جهة متعاقدة' },
-];
-
-const PAYMENTS: PaymentItem[] = [
-  { id: 'pay-1', label: 'استشارة تجارية', amount: '50,000 د.ع', status: 'مدفوع', date: 'اليوم' },
-  { id: 'pay-2', label: 'متابعة تسجيل علامة', amount: '35,000 د.ع', status: 'مدفوع', date: 'أمس' },
-  { id: 'pay-3', label: 'مراجعة مستندات إضافية', amount: '20,000 د.ع', status: 'معلق', date: 'هذا الأسبوع' },
-];
-
-const LAWYERS: LawyerItem[] = [
-  {
-    id: 'lawyer-1',
-    name: 'د. عمر النعيمي',
-    specialty: 'قضايا تجارية',
-    location: 'بغداد',
-    experience: '12 سنة خبرة',
-    availability: 'متاح اليوم',
-    isOnline: true,
-    rating: 4.9,
-    reviews: '128 مراجعة',
-    casesHandled: '+180 قضية',
-    consultationFee: '50,000 د.ع',
-    verified: true,
-    accent: 'from-slate-950 via-brand-dark to-brand-navy',
-    avatar: 'https://ui-avatars.com/api/?name=%D8%AF.%20%D8%B9%D9%85%D8%B1%20%D8%A7%D9%84%D9%86%D8%B9%D9%8A%D9%85%D9%8A&background=0d2a59&color=ffffff&rounded=true&font-size=0.4',
-    tagline: 'مرافعات دقيقة واستشارات للشركات والعقود المعقدة',
-  },
-  {
-    id: 'lawyer-2',
-    name: 'سجا كاظم',
-    specialty: 'ملكية فكرية',
-    location: 'أربيل',
-    experience: '8 سنوات خبرة',
-    availability: 'متاح غداً',
-    isOnline: false,
-    rating: 4.8,
-    reviews: '86 مراجعة',
-    casesHandled: '+95 قضية',
-    consultationFee: '35,000 د.ع',
-    verified: true,
-    accent: 'from-[#1f3c88] via-brand-navy to-[#4f46e5]',
-    avatar: 'https://ui-avatars.com/api/?name=%D8%B3%D8%AC%D8%A7%20%D9%83%D8%A7%D8%B8%D9%85&background=1f3c88&color=ffffff&rounded=true&font-size=0.4',
-    tagline: 'خبرة عملية في العلامات التجارية وحقوق الابتكار',
-  },
-  {
-    id: 'lawyer-3',
-    name: 'علي الجبوري',
-    specialty: 'عقارات',
-    location: 'النجف',
-    experience: '10 سنوات خبرة',
-    availability: 'خلال 48 ساعة',
-    isOnline: false,
-    rating: 4.7,
-    reviews: '91 مراجعة',
-    casesHandled: '+140 قضية',
-    consultationFee: '40,000 د.ع',
-    verified: true,
-    accent: 'from-[#3f2b1d] via-[#7c4a1d] to-brand-gold',
-    avatar: 'https://ui-avatars.com/api/?name=%D8%B9%D9%84%D9%8A%20%D8%A7%D9%84%D8%AC%D8%A8%D9%88%D8%B1%D9%8A&background=3f2b1d&color=ffffff&rounded=true&font-size=0.4',
-    tagline: 'حلول قانونية واضحة في نزاعات الملكية والبيع والإيجار',
-  },
-  {
-    id: 'lawyer-4',
-    name: 'رنا السامرائي',
-    specialty: 'أحوال شخصية',
-    location: 'البصرة',
-    experience: '9 سنوات خبرة',
-    availability: 'متاح هذا الأسبوع',
-    isOnline: true,
-    rating: 4.9,
-    reviews: '104 مراجعة',
-    casesHandled: '+110 قضية',
-    consultationFee: '45,000 د.ع',
-    verified: true,
-    accent: 'from-[#4a1d5e] via-[#7c2d92] to-[#db2777]',
-    avatar: 'https://ui-avatars.com/api/?name=%D8%B1%D9%86%D8%A7%20%D8%A7%D9%84%D8%B3%D8%A7%D9%85%D8%B1%D8%A7%D8%A6%D9%8A&background=4a1d5e&color=ffffff&rounded=true&font-size=0.4',
-    tagline: 'تعامل هادئ وسري مع قضايا الأسرة والأحوال الشخصية',
-  },
-];
-
 export default function UserDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -333,12 +140,12 @@ export default function UserDashboard() {
 
   const [serviceCategory, setServiceCategory] = useState<string>('الكل');
 
-  const cases = dashboardData?.cases?.length ? dashboardData.cases : CASES;
-  const documents = dashboardData?.documents?.length ? dashboardData.documents : DOCUMENTS;
-  const schedule = dashboardData?.schedule?.length ? dashboardData.schedule : SCHEDULE;
-  const payments = dashboardData?.payments?.length ? dashboardData.payments : PAYMENTS;
-  const lawyers = dashboardData?.lawyers?.length ? dashboardData.lawyers : LAWYERS;
-  const services = dashboardData?.services?.length ? dashboardData.services : LEGAL_SERVICES;
+  const cases = dashboardData?.cases ?? [];
+  const documents = dashboardData?.documents ?? [];
+  const schedule = dashboardData?.schedule ?? [];
+  const payments = dashboardData?.payments ?? [];
+  const lawyers = dashboardData?.lawyers ?? [];
+  const services = dashboardData?.services ?? [];
 
   const serviceCategories = useMemo(() => ['الكل', ...Array.from(new Set(services.map(s => s.category)))], [services]);
 
@@ -398,15 +205,14 @@ export default function UserDashboard() {
     const stored = window.localStorage.getItem('lexigate-user-dashboard-tab') as DashboardTab | null;
     return stored ?? 'overview';
   });
-  const [selectedCaseId, setSelectedCaseId] = useState<string>(() => {
-    if (typeof window === 'undefined') return CASES[0].id;
-    return window.localStorage.getItem('lexigate-user-dashboard-case') ?? CASES[0].id;
-  });
+  const [selectedCaseId, setSelectedCaseId] = useState<string>(
+    () => window.localStorage.getItem('lexigate-user-dashboard-case') ?? ''
+  );
   const [headerRange, setHeaderRange] = useState<HeaderRange>('week');
   const [headerFocus, setHeaderFocus] = useState<HeaderFocus>('all');
   const [lawyerQuery, setLawyerQuery] = useState('');
   const [lawyerSpecialty, setLawyerSpecialty] = useState<'الكل' | LawyerItem['specialty']>('الكل');
-  const [selectedLawyerId, setSelectedLawyerId] = useState<string>(LAWYERS[0].id);
+  const [selectedLawyerId, setSelectedLawyerId] = useState<string>('');
 
   const commandResults = useMemo(() => {
     const query = commandQuery.trim().toLowerCase();
@@ -483,7 +289,7 @@ export default function UserDashboard() {
   const upcomingScheduleItem = useMemo(() => schedule[0], [schedule]);
 
   const selectedLawyer = useMemo(
-    () => filteredLawyers.find((lawyer) => lawyer.id === selectedLawyerId) ?? filteredLawyers[0] ?? lawyers[0],
+    () => filteredLawyers.find((lawyer) => lawyer.id === selectedLawyerId) ?? filteredLawyers[0] ?? lawyers[0] ?? null,
     [filteredLawyers, lawyers, selectedLawyerId]
   );
 
@@ -762,82 +568,88 @@ export default function UserDashboard() {
             <p className="text-xs text-slate-500">ملخص سريع لمساعدتك على اتخاذ القرار.</p>
           </div>
           <div className="mt-4 space-y-3">
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-              <div className={`bg-gradient-to-br ${selectedLawyer.accent} p-4 text-right text-white`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white/90">
-                        {selectedLawyer.specialty}
-                      </span>
-                      {selectedLawyer.verified && (
-                        <span className="inline-flex items-center justify-center rounded-full bg-white/15 px-3 py-1 text-white/90">
-                          <i className="fa-solid fa-check text-[11px]"></i>
-                        </span>
-                      )}
+            {selectedLawyer ? (
+              <>
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div className={`bg-gradient-to-br ${selectedLawyer.accent} p-4 text-right text-white`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white/90">
+                            {selectedLawyer.specialty}
+                          </span>
+                          {selectedLawyer.verified && (
+                            <span className="inline-flex items-center justify-center rounded-full bg-white/15 px-3 py-1 text-white/90">
+                              <i className="fa-solid fa-check text-[11px]"></i>
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-lg font-bold">{selectedLawyer.name}</p>
+                        <p className="text-sm leading-6 text-white/80">{selectedLawyer.tagline}</p>
+                      </div>
+                      <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-white/15 text-lg font-bold text-white">
+                        {getLawyerInitial(selectedLawyer)}
+                      </div>
                     </div>
-                    <p className="text-lg font-bold">{selectedLawyer.name}</p>
-                    <p className="text-sm leading-6 text-white/80">{selectedLawyer.tagline}</p>
+                    <div className="mt-4 flex items-center justify-between rounded-xl bg-white/10 px-3 py-3 text-sm">
+                      <span className="font-bold">{selectedLawyer.rating} <i className="fa-solid fa-star mr-1 text-amber-300"></i></span>
+                      <span className="text-white/80">{selectedLawyer.reviews}</span>
+                    </div>
                   </div>
-                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-white/15 text-lg font-bold text-white">
-                    {getLawyerInitial(selectedLawyer)}
+                  <div className="grid gap-3 p-4">
+                    <div className="rounded-xl bg-slate-50 px-4 py-3 text-right">
+                      <p className="text-[11px] text-slate-400">الحالة الحالية</p>
+                      <div
+                        className={`mt-1 h-3.5 w-3.5 rounded-full ${selectedLawyer.isOnline ? 'bg-emerald-500' : 'bg-slate-400'}`}
+                        title={selectedLawyer.isOnline ? 'متصل الآن' : 'غير متصل حالياً'}
+                      />
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <button
+                        type="button"
+                        className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-navy hover:text-brand-navy active:scale-[0.99]"
+                      >
+                        عرض الملف
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-navy hover:bg-white hover:text-brand-navy active:scale-[0.99]"
+                      >
+                        تواصل مباشر
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-4 flex items-center justify-between rounded-xl bg-white/10 px-3 py-3 text-sm">
-                  <span className="font-bold">{selectedLawyer.rating} <i className="fa-solid fa-star mr-1 text-amber-300"></i></span>
-                  <span className="text-white/80">{selectedLawyer.reviews}</span>
-                </div>
-              </div>
-              <div className="grid gap-3 p-4">
                 <div className="rounded-xl bg-slate-50 px-4 py-3 text-right">
-                  <p className="text-[11px] text-slate-400">الحالة الحالية</p>
-                  <div
-                    className={`mt-1 h-3.5 w-3.5 rounded-full ${selectedLawyer.isOnline ? 'bg-emerald-500' : 'bg-slate-400'}`}
-                    title={selectedLawyer.isOnline ? 'متصل الآن' : 'غير متصل حالياً'}
-                  />
+                  <p className="text-[11px] text-slate-400">المدينة</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedLawyer.location}</p>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-navy hover:text-brand-navy active:scale-[0.99]"
-                  >
-                    عرض الملف
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-navy hover:bg-white hover:text-brand-navy active:scale-[0.99]"
-                  >
-                    تواصل مباشر
-                  </button>
+                <div className="rounded-xl bg-slate-50 px-4 py-3 text-right">
+                  <p className="text-[11px] text-slate-400">الخبرة والإنجاز</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-dark">
+                    {selectedLawyer.experience} • {selectedLawyer.casesHandled}
+                  </p>
                 </div>
-              </div>
-            </div>
-            <div className="rounded-xl bg-slate-50 px-4 py-3 text-right">
-              <p className="text-[11px] text-slate-400">المدينة</p>
-              <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedLawyer.location}</p>
-            </div>
-            <div className="rounded-xl bg-slate-50 px-4 py-3 text-right">
-              <p className="text-[11px] text-slate-400">الخبرة والإنجاز</p>
-              <p className="mt-1 text-sm font-semibold text-brand-dark">
-                {selectedLawyer.experience} • {selectedLawyer.casesHandled}
-              </p>
-            </div>
-            <div className="rounded-xl bg-slate-50 px-4 py-3 text-right">
-              <p className="text-[11px] text-slate-400">رسوم الاستشارة</p>
-              <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedLawyer.consultationFee}</p>
-            </div>
-            <div className="rounded-xl bg-slate-50 px-4 py-3 text-right">
-              <p className="text-[11px] text-slate-400">التوفر الحالي</p>
-              <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedLawyer.availability}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setActiveTab('schedule')}
-              title={`حجز استشارة مع ${selectedLawyer.name}`}
-              className="w-full rounded-2xl bg-brand-gold px-4 py-3 text-sm font-bold text-brand-dark transition duration-200 hover:bg-yellow-600 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              احجز الآن مع {selectedLawyer.name}
-            </button>
+                <div className="rounded-xl bg-slate-50 px-4 py-3 text-right">
+                  <p className="text-[11px] text-slate-400">رسوم الاستشارة</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedLawyer.consultationFee}</p>
+                </div>
+                <div className="rounded-xl bg-slate-50 px-4 py-3 text-right">
+                  <p className="text-[11px] text-slate-400">التوفر الحالي</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedLawyer.availability}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('schedule')}
+                  title={`حجز استشارة مع ${selectedLawyer.name}`}
+                  className="w-full rounded-2xl bg-brand-gold px-4 py-3 text-sm font-bold text-brand-dark transition duration-200 hover:bg-yellow-600 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  احجز الآن مع {selectedLawyer.name}
+                </button>
+              </>
+            ) : (
+              <p className="py-10 text-center text-xs text-slate-400 font-bold italic">اختر محامياً لعرض التفاصيل...</p>
+            )}
           </div>
         </section>
       </aside>
@@ -981,12 +793,18 @@ export default function UserDashboard() {
           <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
             <h3 className="text-base font-bold text-brand-dark">الخطوة التالية</h3>
             <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-4 text-right">
-              <p className="text-sm font-bold text-brand-dark">{nextActionCase.title}</p>
-              <p className="mt-1 text-xs text-slate-500">{nextActionCase.nextStep}</p>
-              <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                <span>{nextActionCase.deadline}</span>
-                <span>{nextActionCase.lawyer}</span>
-              </div>
+              {nextActionCase ? (
+                <>
+                  <p className="text-sm font-bold text-brand-dark">{nextActionCase.title}</p>
+                  <p className="mt-1 text-xs text-slate-500">{nextActionCase.nextStep}</p>
+                  <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                    <span>{nextActionCase.deadline}</span>
+                    <span>{nextActionCase.lawyer}</span>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-slate-400 font-bold">لا توجد إجراءات حالية</p>
+              )}
             </div>
           </section>
 
@@ -1004,14 +822,18 @@ export default function UserDashboard() {
                   <p className="mt-1 text-xs text-red-600">{doc.caseName}</p>
                 </button>
               ))}
-              <button
-                type="button"
-                onClick={() => setActiveTab('schedule')}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-right transition hover:border-brand-navy hover:bg-white"
-              >
-                <p className="text-sm font-semibold text-brand-dark">{upcomingScheduleItem.title}</p>
-                <p className="mt-1 text-xs text-slate-500">{upcomingScheduleItem.time}</p>
-              </button>
+              {upcomingScheduleItem ? (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('schedule')}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-right transition hover:border-brand-navy hover:bg-white"
+                >
+                  <p className="text-sm font-semibold text-brand-dark">{upcomingScheduleItem.title}</p>
+                  <p className="mt-1 text-xs text-slate-500">{upcomingScheduleItem.time}</p>
+                </button>
+              ) : (
+                <p className="text-xs text-slate-400 text-center py-2">لا توجد مواعيد قريبة</p>
+              )}
             </div>
           </section>
         </aside>
@@ -1031,27 +853,29 @@ export default function UserDashboard() {
           </div>
 
           {/* Case Roadmap Visualization */}
-          <div className="relative rounded-[2rem] bg-slate-50 p-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 relative">
-              {/* Roadmap Track Line */}
-              <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -translate-y-1/2 hidden md:block"></div>
+          {selectedCase && (
+            <div className="relative rounded-[2rem] bg-slate-50 p-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4 relative">
+                {/* Roadmap Track Line */}
+                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -translate-y-1/2 hidden md:block"></div>
 
-              {selectedCase.milestones.map((ms, idx) => (
-                <div key={ms.id} className="relative z-10 flex flex-col items-center gap-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full border-4 border-white shadow-sm transition-colors duration-500 ${ms.status === 'completed' ? 'bg-emerald-500 text-white' :
-                    ms.status === 'current' ? 'bg-brand-gold text-brand-dark animate-pulse' :
-                      'bg-slate-200 text-slate-400'
-                    }`}>
-                    {ms.status === 'completed' ? <i className="fa-solid fa-check text-xs"></i> : <span className="text-xs font-bold">{idx + 1}</span>}
+                {selectedCase.milestones.map((ms, idx) => (
+                  <div key={ms.id} className="relative z-10 flex flex-col items-center gap-3">
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-full border-4 border-white shadow-sm transition-colors duration-500 ${ms.status === 'completed' ? 'bg-emerald-500 text-white' :
+                      ms.status === 'current' ? 'bg-brand-gold text-brand-dark animate-pulse' :
+                        'bg-slate-200 text-slate-400'
+                      }`}>
+                      {ms.status === 'completed' ? <i className="fa-solid fa-check text-xs"></i> : <span className="text-xs font-bold">{idx + 1}</span>}
+                    </div>
+                    <div className="text-center">
+                      <p className={`text-xs font-bold ${ms.status === 'upcoming' ? 'text-slate-400' : 'text-brand-dark'}`}>{ms.label}</p>
+                      {ms.status === 'current' && <span className="text-[9px] font-bold text-brand-gold uppercase tracking-widest">المرحلة الحالية</span>}
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <p className={`text-xs font-bold ${ms.status === 'upcoming' ? 'text-slate-400' : 'text-brand-dark'}`}>{ms.label}</p>
-                    {ms.status === 'current' && <span className="text-[9px] font-bold text-brand-gold uppercase tracking-widest">المرحلة الحالية</span>}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Cases Table - Responsive */}
           <div className="mt-8 overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
@@ -1113,22 +937,28 @@ export default function UserDashboard() {
             <p className="text-xs text-slate-500">ملخص سريع لما يحتاجه المستخدم الآن.</p>
           </div>
           <div className="mt-4 space-y-3">
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
-              <p className="text-sm font-bold text-brand-dark">{selectedCase.title}</p>
-              <p className="mt-1 text-xs text-slate-500">{selectedCase.subtitle}</p>
-            </div>
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
-              <p className="text-[11px] text-slate-400">الخطوة التالية</p>
-              <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedCase.nextStep}</p>
-            </div>
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
-              <p className="text-[11px] text-slate-400">المحامي</p>
-              <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedCase.lawyer}</p>
-            </div>
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
-              <p className="text-[11px] text-slate-400">الموعد أو المهلة</p>
-              <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedCase.deadline}</p>
-            </div>
+            {selectedCase ? (
+              <>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
+                  <p className="text-sm font-bold text-brand-dark">{selectedCase.title}</p>
+                  <p className="mt-1 text-xs text-slate-500">{selectedCase.subtitle}</p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
+                  <p className="text-[11px] text-slate-400">الخطوة التالية</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedCase.nextStep}</p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
+                  <p className="text-[11px] text-slate-400">المحامي</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedCase.lawyer}</p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
+                  <p className="text-[11px] text-slate-400">الموعد أو المهلة</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedCase.deadline}</p>
+                </div>
+              </>
+            ) : (
+              <p className="py-4 text-center text-xs text-slate-400 font-bold italic">لا يوجد ملف مختار...</p>
+            )}
           </div>
         </section>
       </aside>
@@ -1263,7 +1093,9 @@ export default function UserDashboard() {
           <div className="mt-4 grid gap-3">
             <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
               <p className="text-[11px] text-slate-400">القضية الحالية</p>
-              <p className="mt-1 text-sm font-semibold text-brand-dark">{selectedCase.title}</p>
+              <p className="mt-1 text-sm font-semibold text-brand-dark">
+                {selectedCase ? selectedCase.title : 'لا يوجد ملف مختار'}
+              </p>
             </div>
             <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
               <p className="text-[11px] text-slate-400">أفضل سؤال الآن</p>
@@ -1296,8 +1128,12 @@ export default function UserDashboard() {
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-right">
             <p className="text-[11px] font-bold text-slate-400">آخر متابعة</p>
-            <p className="mt-1 text-sm font-black text-brand-dark">{nextActionCase.title}</p>
-            <p className="mt-1 text-xs text-slate-500">{nextActionCase.nextStep}</p>
+            <p className="mt-1 text-sm font-black text-brand-dark">
+              {nextActionCase ? nextActionCase.title : 'لا توجد قضايا جارية'}
+            </p>
+            {nextActionCase && (
+              <p className="mt-1 text-xs text-slate-500">{nextActionCase.nextStep}</p>
+            )}
           </div>
         </div>
 
