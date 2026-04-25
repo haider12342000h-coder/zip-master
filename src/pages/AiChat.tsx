@@ -33,7 +33,7 @@ const SUGGESTED_PROMPTS = [
 export default function AIChat() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { NotificationBell, notifications, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications } = useNotifications();
+  const { NotificationBell, notifications, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications } = useNotifications(); // Use global notifications
   const location = useLocation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -147,9 +147,9 @@ export default function AIChat() {
               </button>
             ))}
           </div>
-          <div className="h-8 w-px bg-slate-100 mx-1"></div>
-          <div className="relative">
-            <NotificationBell />
+          <div className="h-8 w-px bg-slate-100 mx-1"></div> {/* Separator */}
+          <div className="relative"> {/* Added relative for dropdown positioning */}
+            <NotificationBell /> {/* Use the NotificationBell component from context */}
             <AnimatePresence>
               {isNotificationsOpen && (
                 <motion.div

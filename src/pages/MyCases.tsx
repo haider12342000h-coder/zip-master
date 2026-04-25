@@ -692,7 +692,7 @@ const MOCK_CASES: LegalCase[] = [
 
 export default function MyCases() {
   const { user, logout } = useAuth();
-  const { NotificationBell, notifications, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications } = useNotifications();
+  const { NotificationBell, notifications, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications } = useNotifications(); // Use global notifications
   const navigate = useNavigate();
 
   const [activeCaseId, setActiveCaseId] = useState<string>(MOCK_CASES[0].id);
@@ -1146,8 +1146,8 @@ export default function MyCases() {
           </button>
           <div>
             <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">لوحة متابعة القضايا</p>
-            <div className="flex items-center justify-end gap-3 mt-1">
-              <NotificationBell />
+            <div className="flex items-center justify-end gap-3 mt-1 relative"> {/* Added relative for dropdown positioning */}
+              <NotificationBell /> {/* Use the NotificationBell component from context */}
               <AnimatePresence>
                 {isNotificationsOpen && (
                   <motion.div

@@ -6,6 +6,7 @@ import StatusBadge from '../components/ui/StatusBadge';
 import { useNotifications } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 import apiClient from '../api/client';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type SettingsSection = 'account' | 'security' | 'billing' | 'notifications' | 'integrations' | 'activity';
 
@@ -105,7 +106,7 @@ function getActivityTone(type: ActivityItem['type']) {
 
 export default function Settings() {
   const { user } = useAuth();
-  const { NotificationBell, notifications, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications } = useNotifications();
+  const { NotificationBell, notifications, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications } = useNotifications(); // Use global notifications
   const navigate = useNavigate();
 
   const [activeSection, setActiveSection] = useState<SettingsSection>('account');
@@ -305,7 +306,7 @@ export default function Settings() {
               variant="secondary"
               className="relative"
             >
-              <NotificationBell />
+              <NotificationBell /> {/* Use the NotificationBell component from context */}
               <AnimatePresence>
                 {isNotificationsOpen && (
                   <motion.div

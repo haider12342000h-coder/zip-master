@@ -250,6 +250,13 @@ export default function AdminDashboard() {
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [docToDelete, setDocToDelete] = useState<string | null>(null);
+  
+  const confirmDeleteDoc = async () => {
+    if (!docToDelete) return;
+    await deleteLegalDocument(docToDelete);
+    setDocToDelete(null);
+  };
+  
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [systemLogs, setSystemLogs] = useState<Array<{ id: string, time: string, level: 'info' | 'warn' | 'error', msg: string }>>([
     { id: '1', time: '14:20:01', level: 'info', msg: 'AI RAG Engine: Indexing complete for 42 documents.' },

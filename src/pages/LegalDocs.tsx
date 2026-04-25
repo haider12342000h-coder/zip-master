@@ -110,7 +110,7 @@ export const filterWorkspaceDocs = (docs: LawSource[], workspaceQuery: string, p
 export default function LegalDocs() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { NotificationBell, notifications, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications } = useNotifications();
+  const { NotificationBell, notifications, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications } = useNotifications(); // Use global notifications
   const isAdmin = user?.role === 'admin';
   const [docs, setDocs] = useState<LawSource[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -452,7 +452,7 @@ export default function LegalDocs() {
               variant="secondary"
               className="relative"
             >
-              <NotificationBell />
+              <NotificationBell /> {/* Use the NotificationBell component from context */}
               <AnimatePresence>
                 {isNotificationsOpen && (
                   <motion.div
@@ -905,6 +905,7 @@ export default function LegalDocs() {
         )}
       </AnimatePresence>
       {/* NotificationToast is now rendered globally by NotificationProvider */}
+      {/* NotificationToast is now rendered globally by NotificationProvider, removed local toast */}
     </div>
   );
 }

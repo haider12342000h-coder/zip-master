@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// This file is not using NotificationContext, so no changes are needed here for the current request.
 type ChatRole = 'user' | 'ai';
 type WorkspaceTab = 'chat' | 'sources' | 'prompts' | 'overview';
 

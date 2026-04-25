@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useAuth } from './src/context/AuthContext';
+import { useAuth } from './AuthContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
-interface Notification {
+export interface Notification {
   id: string;
   userId: string;
   title: string;
@@ -63,7 +63,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user?.id) return;
     try {
       const response = await fetch('/api/notifications', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('lexigate_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
       });
       const data = await response.json();
       setNotifications(data.data || []);
@@ -98,7 +98,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       await fetch(`/api/notifications/${id}/read`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('lexigate_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
       });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     } catch (err) {
@@ -107,7 +107,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, []);
 
   const clearAllNotifications = useCallback(async () => {
-    // In a real app, you'd have an API endpoint to clear all
     setNotifications([]);
   }, []);
 
@@ -140,11 +139,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             exit={{ opacity: 0, y: 20, scale: 0.9, x: 20 }}
             className="fixed bottom-6 right-6 z-[600] max-w-sm w-full"
           >
-            <div className="bg-brand-dark text-white rounded-[2rem] p-5 shadow-2xl border border-white/10 flex items-start gap-4 backdrop-blur-md">
+            <div className="bg-brand-dark text-white rounded-[2rem] p-5 shadow-2xl border border-white/10 flex items-start gap-4 backdrop-blur-md text-right">
               <div className="h-12 w-12 rounded-2xl bg-brand-gold/20 flex items-center justify-center text-brand-gold shrink-0 shadow-inner">
                 <i className="fa-solid fa-bell-concierge text-lg animate-bounce"></i>
               </div>
-              <div className="flex-1 min-w-0 text-right">
+              <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-black text-brand-gold mb-1">{activeToast.title}</h4>
                 <p className="text-xs font-bold text-slate-300 leading-relaxed line-clamp-2">{activeToast.message}</p>
                 <button 

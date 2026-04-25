@@ -77,7 +77,7 @@ function PublicStat({ label, value, note }: { label: string; value: string; note
 export default function Profile() {
   const navigate = useNavigate();
   const params = useParams<{ id: string }>();
-  const { NotificationBell, notifications, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications } = useNotifications();
+  const { NotificationBell, notifications, isNotificationsOpen, setIsNotificationsOpen, markAsRead, clearAllNotifications } = useNotifications(); // Use global notifications
   const [activeTab, setActiveTab] = useState<PublicTab>('overview');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const { isFollowed, toggleFollow } = useFollowedLawyers();
@@ -251,8 +251,8 @@ export default function Profile() {
             <button
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
               className="relative h-12 w-12 flex items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400 hover:text-brand-navy hover:shadow-md transition-all"
-            >
-              <NotificationBell />
+            > {/* Removed local NotificationBell and dropdown, now handled by global context */}
+              <NotificationBell /> {/* Use the NotificationBell component from context */}
               <AnimatePresence>
                 {isNotificationsOpen && (
                   <motion.div
@@ -448,7 +448,7 @@ export default function Profile() {
           </div>
         </section>
       )}
-      {/* NotificationToast is now rendered globally by NotificationProvider */}
+      {/* NotificationToast is now rendered globally by NotificationProvider, removed local toast */}
     </div>
   );
 }
