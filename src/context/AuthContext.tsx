@@ -12,6 +12,7 @@ export interface AuthUser {
   licenseStatus?: string;
   img?: string;
   roleDescription?: string;
+  accountBalance?: number;
 }
 
 interface AuthContextType {

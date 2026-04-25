@@ -2040,6 +2040,10 @@ export default function ProDashboard() {
           <div className="min-w-0 text-right">
             <div className="flex items-center justify-end gap-3 mb-4">
               <NotificationBell />
+              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-100 shadow-sm">
+                <i className="fa-solid fa-sack-dollar text-brand-gold text-xs"></i>
+                <span className="text-xs font-black text-brand-dark">{(user?.accountBalance ?? 0).toLocaleString('ar-IQ')} د.ع</span>
+              </div>
               <AnimatePresence>
                 {isNotificationsOpen && (
                   <motion.div

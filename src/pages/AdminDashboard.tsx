@@ -892,9 +892,15 @@ export default function AdminDashboard() {
       <section className="rounded-[40px] border border-brand-navy/10 bg-gradient-to-l from-white via-slate-50/50 to-brand-navy/10 p-6 shadow-premium md:p-8">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div className="flex-1 min-w-0">
-            <div className="inline-flex items-center rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-xs font-bold text-brand-navy">
-              <i className="fa-solid fa-server ml-2"></i>
-              مركز الإدارة
+            <div className="flex items-center gap-3">
+              <div className="inline-flex items-center rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-xs font-bold text-brand-navy">
+                <i className="fa-solid fa-server ml-2"></i>
+                مركز الإدارة
+              </div>
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-xl bg-white/50 border border-slate-100 shadow-sm backdrop-blur-sm">
+                <i className="fa-solid fa-building-columns text-brand-navy text-[10px]"></i>
+                <span className="text-[10px] font-black text-brand-dark">{(user?.accountBalance ?? 0).toLocaleString('ar-IQ')} د.ع</span>
+              </div>
             </div>
             <h2 className="mt-4 text-3xl font-bold leading-tight text-brand-dark">مركز الإدارة التشغيلي</h2>
             <p className="mt-2 text-sm leading-relaxed text-gray-600">

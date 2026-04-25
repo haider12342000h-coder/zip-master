@@ -308,7 +308,7 @@ export default function UserDashboard() {
       { label: 'القضايا النشطة', value: '3', note: 'منها 1 تحتاج إجراء منك', icon: 'fa-solid fa-briefcase', tone: 'text-brand-navy', progress: 75, color: 'bg-brand-navy' },
       { label: 'المستندات المطلوبة', value: '2', note: 'جاهزة للرفع الآن', icon: 'fa-solid fa-file-shield', tone: 'text-amber-600', progress: 40, color: 'bg-amber-500' },
       { label: 'صحة الملف', value: '82%', note: 'أكمل رفع الهوية للتحسين', icon: 'fa-solid fa-heart-pulse', tone: 'text-emerald-600', progress: 82, color: 'bg-emerald-500' },
-      { label: 'الرصيد', value: '125,000', note: 'IQD متاح', icon: 'fa-solid fa-vault', tone: 'text-brand-gold', progress: 100, color: 'bg-brand-gold' },
+      { label: 'الرصيد', value: (user?.accountBalance ?? 0).toLocaleString('ar-IQ'), note: 'IQD متاح', icon: 'fa-solid fa-vault', tone: 'text-brand-gold', progress: 100, color: 'bg-brand-gold' },
     ],
     []
   );
@@ -1279,6 +1279,10 @@ export default function UserDashboard() {
       <div className="mb-5 flex items-center justify-between rounded-2xl bg-brand-navy/95 backdrop-blur-md p-4 text-white shadow-lg shadow-brand-navy/20 animate-in slide-in-from-top duration-500 border border-white/10">
         <div className="flex items-center gap-3 min-w-0 relative"> {/* Added relative for dropdown positioning */}
           <NotificationBell /> {/* Use the NotificationBell component from context */}
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/10">
+            <i className="fa-solid fa-wallet text-brand-gold text-xs"></i>
+            <span className="text-xs font-black">{(user?.accountBalance ?? 0).toLocaleString('ar-IQ')} د.ع</span>
+          </div>
           <AnimatePresence>
             {isNotificationsOpen && (
               <motion.div

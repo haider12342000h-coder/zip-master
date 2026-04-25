@@ -1022,6 +1022,10 @@ export default function MyCases() {
             <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">لوحة متابعة القضايا</p>
             <div className="flex items-center justify-end gap-3 mt-1 relative"> {/* Added relative for dropdown positioning */}
               <NotificationBell /> {/* Use the NotificationBell component from context */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-slate-100 shadow-sm">
+                <i className="fa-solid fa-wallet text-brand-gold text-xs"></i>
+                <span className="text-xs font-black text-brand-dark">{(user?.accountBalance ?? 0).toLocaleString('ar-IQ')} د.ع</span>
+              </div>
               <AnimatePresence>
                 {isNotificationsOpen && (
                   <motion.div
